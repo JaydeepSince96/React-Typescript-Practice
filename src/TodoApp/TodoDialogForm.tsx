@@ -30,7 +30,7 @@ const TodoDialogForm = ({ onSubmit, form }: TodoDialogFormProps) => {
     <div>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a new task</DialogTitle>
+        <DialogTitle>{form.getValues("task") ? "Edit task" : "Add a new task"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -50,7 +50,7 @@ const TodoDialogForm = ({ onSubmit, form }: TodoDialogFormProps) => {
             />
 
             <DialogFooter>
-              <Button type="submit">Add Todo</Button>
+            <Button type="submit">{form.getValues("task") ? "Update" : "Add"}</Button>
             </DialogFooter>
           </form>
         </Form>

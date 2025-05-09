@@ -1,12 +1,12 @@
 import './App.css'
-import { Button } from './components/ui/button'
+import Todos from './TodoApp/Todos'
 
 function App() {
 
   return (
     <>
-      <div className='bg-amber-200 h-full w-full'>
-        <Button title='Button' />
+      <div className='App bg-amber-500 h-screen  w-screen'>
+        <Todos/>
       </div>
     </>
   )

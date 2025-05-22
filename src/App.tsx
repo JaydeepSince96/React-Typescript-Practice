@@ -1,12 +1,13 @@
 import './App.css'
-import Todos from './TodoApp/Todos'
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes/Routes"
 
 function App() {
 
   return (
     <>
       <div className='App bg-amber-500 h-screen  w-screen'>
-        <Todos/>
+        <RouterProvider router={router} />
       </div>
     </>
   )

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import todoReducer from "./features/Todos/TodoSlice"
+import priorityReducer from "./features/Todos/PrioritySlice"
 
 export const store = configureStore({
   reducer: {
-    todo: todoReducer
+    todo: todoReducer,
+    priority: priorityReducer
   },
 })
 

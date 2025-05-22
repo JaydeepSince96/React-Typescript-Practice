@@ -7,27 +7,23 @@ import { addNewTodo, deleteTodo, toggleTodo } from "@/features/Todos/TodoSlice";
 import { formSchema } from "@/schema/TodoFormSchema";
 import type { RootState } from "@/store";
 import type { ITodo } from "@/features/Todos/TodoSlice";
-import { BsFillPencilFill } from "react-icons/bs";
-import { MdOutlineDelete } from "react-icons/md";
 import { z } from "zod";
 import { updateTodo } from "@/features/Todos/TodoSlice";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import TodoDialogForm from "./TodoDialogForm";
-// import { addPriority } from "@/features/Todos/PrioritySlice";
 import { setPriority } from "@/features/Todos/TodoSlice";
 import { priorityLabels } from "@/const/const";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-// import TaskCard from "./TaskCard";
-// import { getPriorityValue } from "@/utils/getPriorityValues";
+import TaskCard from "./TaskCard";
+import { type PriorityLevel } from "@/features/Todos/TodoSlice";
 
 export default function Todos() {
   const [open, setOpen] = useState(false);
   const [editTodo, setEditTodo] = useState<ITodo | null>(null);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const todoText = useSelector((text: RootState) => text.todo);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,70 +70,20 @@ export default function Todos() {
           <p>No todos yet.</p>
         ) : (
           todoText.map((todo) => (
-            <div
+            <TaskCard
               key={todo.id}
-              className="border p-3 rounded-md flex items-start justify-between gap-4"
-            >
-              <div className="flex items-start gap-2">
-                <Input
-                  type="checkbox"
-                  checked={todo.isDone}
-                  onChange={() => dispatch(toggleTodo(todo.id))}
-                  className="mt-1"
-                />
-                <div>
-                  <h4
-                    className={`text-lg font-medium ${
-                      todo.isDone ? "line-through text-gray-500" : ""
-                    }`}
-                  >
-                    {todo.task}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Added: {new Date(todo.timeAndDate).toLocaleString()}
-                  </p>
-                  <p
-                    className={`text-sm ${
-                      todo.isDone ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {todo.isDone ? "Done" : "Pending"}
-                  </p>
-                </div>
-                {priorityLabels.map((priorityLabels) => (
-                  <Button
-                    key={priorityLabels.value}
-                    className="m-2"
-                    variant="link"
-                    onClick={() =>
-                      dispatch(
-                        setPriority({
-                          id: todo.id,
-                          priority: priorityLabels.value,
-                        })
-                      )
-                    }
-                  >
-                    {priorityLabels.value}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <BsFillPencilFill
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setEditTodo(todo);
-                    form.setValue("task", todo.task);
-                    setOpen(true);
-                  }}
-                />
-                <MdOutlineDelete
-                  className="cursor-pointer"
-                  onClick={() => handleTodoDelete(todo.id)}
-                />
-              </div>
-            </div>
+              todo={todo}
+              onToggle={() => dispatch(toggleTodo(todo.id))}
+              onSetPriority={(priority) =>
+                dispatch(setPriority({ id: todo.id, priority:priority as PriorityLevel }))
+              }
+              onEdit={() => {
+                setEditTodo(todo);
+                form.setValue("task", todo.task);
+                setOpen(true);
+              }}
+              onDelete={() => handleTodoDelete(todo.id)}
+            />
           ))
         )}
       </div>

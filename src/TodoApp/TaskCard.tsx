@@ -13,7 +13,13 @@ type TaskCardProps = {
   onDelete: () => void;
 };
 
-const TaskCard = ({ todo, onToggle, onSetPriority, onEdit, onDelete }: TaskCardProps) => {
+const TaskCard = ({
+  todo,
+  onToggle,
+  onSetPriority,
+  onEdit,
+  onDelete,
+}: TaskCardProps) => {
   return (
     <div className="border p-3 rounded-md flex items-start justify-between gap-4">
       <div className="flex items-start gap-2">
@@ -25,32 +31,49 @@ const TaskCard = ({ todo, onToggle, onSetPriority, onEdit, onDelete }: TaskCardP
         />
         <div>
           <h4
-            className={`text-lg font-medium ${todo.isDone ? "line-through text-gray-500" : ""}`}
+            className={`text-lg font-medium ${
+              todo.isDone ? "line-through text-gray-500" : ""
+            }`}
           >
             {todo.task}
           </h4>
           <p className="text-sm text-muted-foreground">
             Added: {new Date(todo.timeAndDate).toLocaleString()}
           </p>
-          <p className={`text-sm ${todo.isDone ? "text-green-600" : "text-red-600"}`}>
+          <p
+            className={`text-sm ${
+              todo.isDone ? "text-green-600" : "text-red-600"
+            }`}
+          >
             {todo.isDone ? "Done" : "Pending"}
           </p>
+        </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {priorityLabels.map((label) => (
+        <div className="flex gap-2">
+          {priorityLabels.map((label) => {
+            const isSelected = todo.priority === label.value;
+            return (
               <Button
                 key={label.value}
-                className="m-1"
-                variant="link"
                 onClick={() => onSetPriority(label.value)}
+                variant="link"
+                className={`w-20 h-8 flex items-center justify-center text-sm rounded-full transition-colors px-2 py-1
+          ${
+            isSelected
+              ? label.value === "High"
+                ? "bg-red-100 text-red-700 font-semibold"
+                : label.value === "Medium"
+                ? "bg-yellow-100 text-yellow-700 font-semibold"
+                : "bg-green-100 text-green-700 font-semibold"
+              : "text-gray-500 hover:text-black"
+          }`}
               >
                 {label.value}
               </Button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
-
       <div className="flex items-center gap-3">
         <BsFillPencilFill className="cursor-pointer" onClick={onEdit} />
         <MdOutlineDelete className="cursor-pointer" onClick={onDelete} />

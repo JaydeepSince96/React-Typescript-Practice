@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@/utils/useQuery";
+import { useNavigate } from "react-router-dom";
 
 import { toggleTodo, setPriority, deleteTodo, updateTodo } from "@/features/Todos/TodoSlice";
 import type { RootState } from "@/store";
@@ -14,10 +15,12 @@ import { z } from "zod";
 import TaskCard from "../TaskCard";
 import { Dialog} from "@/components/ui/dialog";
 import TodoDialogForm from "../TodoDialogForm";
+import { Button } from "@/components/ui/button";
 
 
 const Priority: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const query = useQuery();
   const currentPriority = query.get("level") as PriorityLevel;
 
@@ -46,6 +49,9 @@ const Priority: React.FC = () => {
       <h2 className="text-2xl font-semibold mb-4">
         Todos with Priority: <span className="capitalize">{currentPriority}</span>
       </h2>
+      <div>
+        <Button variant={"outline"} onClick={()=>navigate("/")} >Back</Button>
+      </div>
 
       {filteredTodos.length === 0 ? (
         <p>No todos with this priority.</p>

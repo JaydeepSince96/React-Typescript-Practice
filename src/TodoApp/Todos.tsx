@@ -25,6 +25,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
+import { SidebarLayout } from "@/layout/SidebarLayout";
 
 export default function Todos() {
   const [open, setOpen] = useState(false);
@@ -65,6 +66,7 @@ export default function Todos() {
   }
 
   return (
+    <SidebarLayout>
     <div className="p-4">
       <div className="flex gap-2">
         <div className="priority ">
@@ -148,5 +150,6 @@ export default function Todos() {
         </Pagination>
       )}
     </div>
+    </SidebarLayout>
   );
 }

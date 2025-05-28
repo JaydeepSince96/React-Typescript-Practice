@@ -6,7 +6,7 @@ function App() {
 
   return (
     <>
-      <div className='App bg-amber-500 h-screen  w-screen'>
+      <div className='App bg-neutral-700 h-screen  w-screen'>
         <RouterProvider router={router} />
       </div>
     </>

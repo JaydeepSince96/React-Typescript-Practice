@@ -17,6 +17,14 @@ import { priorityLabels } from "@/const/const";
 import { useNavigate } from "react-router-dom";
 import TaskCard from "./TaskCard";
 import { type PriorityLevel } from "@/features/Todos/TodoSlice";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 export default function Todos() {
   const [open, setOpen] = useState(false);
@@ -25,6 +33,15 @@ export default function Todos() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const todoText = useSelector((text: RootState) => text.todo);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+  const totalTodos = todoText.length;
+  const totalPages = Math.ceil(totalTodos / itemsPerPage);
+
+  const paginatedTodos = todoText.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,16 +83,21 @@ export default function Todos() {
         </div>
       </div>
       <div className="space-y-4 p-4">
-        {todoText.length === 0 ? (
+        {paginatedTodos.length === 0 ? (
           <p>No todos yet.</p>
         ) : (
-          todoText.map((todo) => (
+          paginatedTodos.map((todo) => (
             <TaskCard
               key={todo.id}
               todo={todo}
               onToggle={() => dispatch(toggleTodo(todo.id))}
               onSetPriority={(priority) =>
-                dispatch(setPriority({ id: todo.id, priority:priority as PriorityLevel }))
+                dispatch(
+                  setPriority({
+                    id: todo.id,
+                    priority: priority as PriorityLevel,
+                  })
+                )
               }
               onEdit={() => {
                 setEditTodo(todo);
@@ -94,6 +116,37 @@ export default function Todos() {
 
         <TodoDialogForm onSubmit={onSubmit} form={form} />
       </Dialog>
+      {totalPages > 1 && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              />
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  isActive={page === currentPage}
+                  onClick={() => setCurrentPage(page)}
+                  href="#"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

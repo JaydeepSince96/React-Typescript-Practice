@@ -1,17 +1,3 @@
-// import type { ReactNode } from "react";
-// import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
-
-// export const SidebarLayout = ({ children }: { children: ReactNode }) => {
-//   return (
-//     <SidebarProvider>
-//       <div className="flex min-h-screen bg-neutral-800 text-white">
-//         <Sidebar />
-//         <main className="flex-1 w-6xl">{children}</main>
-//       </div>
-//     </SidebarProvider>
-//   );
-// };
-
 import type { ReactNode } from "react";
 import {
   Sidebar,
@@ -30,12 +16,12 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
       <div className="flex min-h-screen bg-neutral-800 text-white">
         <Sidebar variant="sidebar" collapsible="offcanvas">
           <SidebarHeader className="p-4 text-lg font-bold">
-            My App
+            Peak Productivity
           </SidebarHeader>
 
           <SidebarContent>
-            <div className="p-4">Dashboard</div>
-            <div className="p-4">Projects</div>
+            <div className="p-4">Productivity Report</div>
+            <div className="p-4">Tasks Reports </div>
             <div className="p-4">Settings</div>
           </SidebarContent>
 
@@ -52,7 +38,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
             <SidebarTrigger className="btn btn-primary" />
           </div>
 
-          <main className="flex-1 w-6xl bg-neutral-700">{children}</main>
+          <main className="flex-1 w-screen bg-neutral-700">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

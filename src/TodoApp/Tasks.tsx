@@ -11,7 +11,7 @@ import { z } from "zod";
 import { updateTodo } from "@/features/Todos/TodoSlice";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import TodoDialogForm from "./TodoDialogForm";
+import TodoDialogForm from "./TaskDialogForm";
 import { setPriority } from "@/features/Todos/TodoSlice";
 import { priorityLabels } from "@/const/const";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/pagination";
 import { SidebarLayout } from "@/layout/SidebarLayout";
 
-export default function Todos() {
+export default function Tasks() {
   const [open, setOpen] = useState(false);
   const [editTodo, setEditTodo] = useState<ITodo | null>(null);
 
@@ -86,7 +86,7 @@ export default function Todos() {
       </div>
       <div className="space-y-4 p-4">
         {paginatedTodos.length === 0 ? (
-          <p>No todos yet.</p>
+          <p>No Tasks yet.</p>
         ) : (
           paginatedTodos.map((todo) => (
             <TaskCard
@@ -113,7 +113,7 @@ export default function Todos() {
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button onClick={() => setOpen(true)}>Add new Todo</Button>
+          <Button onClick={() => setOpen(true)}>Add new Task</Button>
         </DialogTrigger>
 
         <TodoDialogForm onSubmit={onSubmit} form={form} />

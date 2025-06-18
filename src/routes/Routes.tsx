@@ -1,6 +1,6 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import Todos from "@/TodoApp/Todos";
+import Tasks from "@/TodoApp/Tasks";
 import Priority from "@/TodoApp/priority-wise/Priority";
 
 
@@ -8,7 +8,7 @@ import Priority from "@/TodoApp/priority-wise/Priority";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Todos/>,
+    element: <Tasks/>,
   },
   {
     path: "/priority",

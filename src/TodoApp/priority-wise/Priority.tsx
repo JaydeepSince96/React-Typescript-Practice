@@ -14,7 +14,7 @@ import { z } from "zod";
 
 import TaskCard from "../TaskCard";
 import { Dialog} from "@/components/ui/dialog";
-import TodoDialogForm from "../TodoDialogForm";
+import TodoDialogForm from "../TaskDialogForm";
 import { Button } from "@/components/ui/button";
 
 

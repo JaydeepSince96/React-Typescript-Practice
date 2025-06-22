@@ -63,7 +63,7 @@ const TaskCard = ({
           onValueChange={(value) => onSetPriority(value)}
         >
           <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Select Priority" />
+            <SelectValue placeholder="Set Priority" />
           </SelectTrigger>
           <SelectContent>
             {priorityLabels.map((label) => (

@@ -66,11 +66,10 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                   isCollapsed ? "" : "rotate-180"
                 }`}
               />
-              Menu
             </SidebarTrigger>
           </div>
 
-          <main className="flex-1 bg-neutral-900">{children}</main>
+          <main className="flex-1 h-screen overflow-y-auto bg-neutral-900 p-4">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

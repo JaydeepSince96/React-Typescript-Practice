@@ -86,7 +86,7 @@ export default function Tasks() {
       </div>
       <div className="space-y-4 p-4">
         {paginatedTodos.length === 0 ? (
-          <p>No Tasks yet.</p>
+          <p className=" text-amber-50">No Tasks yet.</p>
         ) : (
           paginatedTodos.map((todo) => (
             <TaskCard

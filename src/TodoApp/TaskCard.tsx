@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { BsFillPencilFill } from "react-icons/bs";
 import { MdOutlineDelete } from "react-icons/md";
 import { priorityLabels } from "@/const/const";
+import CalendarPicker from "./CalanderPicker";
+import { useState } from "react";
 import type { ITodo } from "@/features/Todos/TodoSlice";
 
 type TaskCardProps = {
@@ -26,6 +28,8 @@ const TaskCard = ({
   onEdit,
   onDelete,
 }: TaskCardProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   return (
     <div className="border p-3 rounded-md flex items-start justify-between gap-4">
       {/* Left Side: Checkbox and Text Info */}
@@ -38,7 +42,7 @@ const TaskCard = ({
         />
         <div>
           <p
-            className={`font-medium ${
+            className={`  text-amber-50 font-medium ${
               todo.isDone ? "line-through text-gray-500" : ""
             }`}
           >
@@ -58,6 +62,10 @@ const TaskCard = ({
       </div>
 
       <div className="flex items-center gap-4 mr-10">
+        <CalendarPicker
+          selectedDate={selectedDate}
+          onChange={setSelectedDate}
+        />
         <Select
           value={todo.priority ?? ""}
           onValueChange={(value) => onSetPriority(value)}

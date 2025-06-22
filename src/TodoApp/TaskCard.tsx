@@ -27,16 +27,16 @@ const TaskCard = ({
           type="checkbox"
           checked={todo.isDone}
           onChange={onToggle}
-          className="mt-1"
+          className="mt-1 size-5"
         />
         <div>
-          <h4
-            className={`text-lg font-medium ${
+          <p
+            className={`font-medium ${
               todo.isDone ? "line-through text-gray-500" : ""
             }`}
           >
             {todo.task}
-          </h4>
+          </p>
           <p className="text-sm text-muted-foreground">
             Added: {new Date(todo.timeAndDate).toLocaleString()}
           </p>
@@ -49,7 +49,7 @@ const TaskCard = ({
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-10">
           {priorityLabels.map((label) => {
             const isSelected = todo.priority === label.value;
             return (
@@ -74,9 +74,9 @@ const TaskCard = ({
           })}
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <BsFillPencilFill className="cursor-pointer" onClick={onEdit} />
-        <MdOutlineDelete className="cursor-pointer" onClick={onDelete} />
+      <div className="flex items-center mr-7 gap-3">
+        <BsFillPencilFill className="cursor-pointer size-5" onClick={onEdit} />
+        <MdOutlineDelete className="cursor-pointer size-5" onClick={onDelete} />
       </div>
     </div>
   );

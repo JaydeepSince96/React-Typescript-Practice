@@ -28,7 +28,7 @@ type TodoDialogFormProps = {
 const TodoDialogForm = ({ onSubmit, form }: TodoDialogFormProps) => {
   return (
     <div>
-      <DialogContent>
+      <DialogContent className=" bg-neutral-700 text-amber-50" >
         <DialogHeader>
         <DialogTitle>{form.getValues("task") ? "Edit task" : "Add a new task"}</DialogTitle>
         </DialogHeader>

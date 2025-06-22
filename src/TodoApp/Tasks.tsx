@@ -69,11 +69,11 @@ export default function Tasks() {
     <SidebarLayout>
     <div className="p-4">
       <div className="flex gap-2">
-        <div className="priority ">
+        <div className="priority ml-3.5 pb-2.5 pt-2.5 ">
           {priorityLabels.map((item) => (
             <Button
-              className="m-2 h-2.5"
-              variant={"outline"}
+              className="m-2 h-3"
+              variant={"destructive"}
               key={item.value}
               onClick={() =>
                 navigate(`/priority?level=${encodeURIComponent(item.value)}`)
@@ -147,7 +147,7 @@ export default function Tasks() {
               />
             </PaginationItem>
           </PaginationContent>
-        </Pagination>
+        </Pagination >
       )}
     </div>
     </SidebarLayout>

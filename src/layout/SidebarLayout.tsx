@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarItems } from "@/const/const";
 import { FaArrowRightLong } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+
 
 export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sidebar: any = useSidebar(); // fallback if typing not available
   const isCollapsed = sidebar.collapsed ?? sidebar.isCollapsed ?? false;
+  const navigate = useNavigate();
 
   return (
     <SidebarProvider>
@@ -33,6 +36,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                 <div
                   key={items.label}
                   className="text-amber-50 px-2 m-4 py-1 rounded hover:bg-neutral-600 cursor-pointer"
+                  onClick={() => navigate(items.path)}
                 >
                   {items.value}
                 </div>

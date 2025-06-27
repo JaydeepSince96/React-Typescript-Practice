@@ -5,7 +5,7 @@ export const priorityLabels = [
 ] as const;
 
 export const SidebarItems = [
-  { label: "Productivity Report", value: "Productivity Report" },
-  { lable: "Tasks Reports ", value: "Tasks Reports " },
-  { lable: "Settings", value: "Settings" },
+  { label: "Productivity Report", value: "Productivity Report", path: "/chart" },
+  { label: "Tasks Reports", value: "Tasks Reports", path: "/tasks" },
+  { label: "Settings", value: "Settings", path: "/settings" },
 ];

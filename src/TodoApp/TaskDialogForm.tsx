@@ -28,29 +28,53 @@ type TodoDialogFormProps = {
 const TodoDialogForm = ({ onSubmit, form }: TodoDialogFormProps) => {
   return (
     <div>
-      <DialogContent className=" bg-neutral-700 text-amber-50" >
+      <DialogContent className="bg-neutral-800 text-white rounded-lg shadow-xl border border-neutral-700">
         <DialogHeader>
-        <DialogTitle>{form.getValues("task") ? "Edit task" : "Add a new task"}</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-amber-50">
+            {form.getValues("task") ? "Edit Task" : "Add a New Task"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 p-4"
+          >
             <FormField
               control={form.control}
               name="task"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Task</FormLabel>
+                  <FormLabel className="text-neutral-300 text-base">
+                    Task
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Buy groceries" {...field} />
+                    <Input
+                      placeholder="e.g. Do a meeting with Product Manager"
+                      {...field}
+                      className="bg-neutral-700 border-neutral-600 text-white placeholder:text-neutral-500 focus:border-sky-500 focus-visible:ring-sky-500"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400 text-sm" />
                 </FormItem>
               )}
             />
 
-            <DialogFooter>
-            <Button type="submit">{form.getValues("task") ? "Update" : "Add"}</Button>
+            <DialogFooter className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => form.reset()} // Assuming a way to close or cancel the dialog
+                className="bg-transparent border border-neutral-600 text-white hover:bg-neutral-700 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-md"
+              >
+                {form.getValues("task") ? "Update" : "Add Task"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -16,7 +16,8 @@ const CalendarButton = forwardRef<
   <button
     onClick={onClick}
     ref={ref}
-    className="flex items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1.5 text-sm text-white shadow-sm hover:bg-neutral-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    // Premium styling: darker background, subtle border, rounded, accent hover
+    className="flex items-center gap-2 rounded-md border border-neutral-600 bg-neutral-700 px-3 py-1.5 text-sm text-white shadow-sm hover:bg-neutral-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500 transition-colors"
   >
     <FaRegCalendarAlt className="text-amber-400" />
     <span>{value || "Date"}</span>
@@ -28,12 +29,16 @@ const CalendarPicker: React.FC<CalendarProps> = ({
   onChange,
 }) => {
   return (
+    // Z-index for the date picker overlay to appear above other content
     <div className="relative z-50">
       <DatePicker
         selected={selectedDate}
         onChange={onChange}
         dateFormat="dd/MM/yyyy"
         customInput={<CalendarButton />}
+        // You might need to add global CSS for react-datepicker popup styles
+        // Example: .react-datepicker { background-color: #333; border: 1px solid #555; }
+        // .react-datepicker__header { background-color: #444; } etc.
       />
     </div>
   );

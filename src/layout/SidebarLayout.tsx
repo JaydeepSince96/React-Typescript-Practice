@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Sidebar,
   SidebarProvider,
@@ -14,7 +14,11 @@ import {
 import { SidebarItems } from "@/const/const";
 import { FaBars, FaArrowRightLong } from "react-icons/fa6"; // Import FaBars for hamburger icon
 import { useNavigate } from "react-router-dom";
-import { MdOutlineDashboard, MdOutlineReport, MdOutlineSettings } from "react-icons/md";
+import {
+  MdOutlineDashboard,
+  MdOutlineReport,
+  MdOutlineSettings,
+} from "react-icons/md";
 
 // Helper to get icons for sidebar items
 const getSidebarIcon = (label: string) => {
@@ -35,12 +39,16 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   const sidebar: any = useSidebar(); // Assuming useSidebar provides current state
   const isCollapsed = sidebar.collapsed ?? sidebar.isCollapsed ?? false;
   const isMobileOpen = sidebar.open ?? false; // Assuming 'open' state for offcanvas on mobile
+  const { open, setOpen } = useSidebar();
 
   const navigate = useNavigate();
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen min-w-screen bg-neutral-900 text-white overflow-hidden relative"> {/* Added relative for overlay positioning */}
+      <div className="flex min-h-screen min-w-screen bg-neutral-900 text-white overflow-hidden relative">
+        {" "}
+        {/* Added relative for overlay positioning */}
         {/* Mobile Overlay */}
         {isMobileOpen && (
           <div
@@ -48,12 +56,29 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
             onClick={() => sidebar.setOpen(false)} // Close sidebar on overlay click
           ></div>
         )}
-
-        <Sidebar variant="sidebar" collapsible="offcanvas" className="bg-neutral-800 border-r border-neutral-700 shadow-xl z-50"> {/* z-50 to ensure it's above overlay */}
-          <SidebarHeader className="p-5 text-2xl font-extrabold bg-neutral-800 text-sky-400">
-            Peak Productivity
+        <Sidebar
+          variant="sidebar"
+          collapsible="offcanvas"
+          className="bg-neutral-800 border-r border-neutral-700 shadow-xl z-50"
+        >
+          {" "}
+          {/* z-50 to ensure it's above overlay */}
+          <SidebarHeader
+            className={`p-5 text-2xl font-extrabold bg-neutral-800 text-sky-400 overflow-hidden whitespace-nowrap transition-all duration-300 cursor-pointer
+                            ${
+                              isDesktopCollapsed
+                                ? "md:px-2 md:text-xl md:text-center"
+                                : "md:text-left"
+                            }`}
+            onClick={() => {
+              navigate("/"); // This line navigates to the home screen
+              if (open) {
+                setOpen(false);
+              }
+            }}
+          >
+            {isDesktopCollapsed ? "PP" : "Peak Productivity"}
           </SidebarHeader>
-
           <SidebarContent className="bg-neutral-800 flex-grow py-4">
             <div className="flex flex-col gap-2 p-2">
               {SidebarItems.map((item) => (
@@ -67,7 +92,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                   }`}
                   onClick={() => {
                     navigate(item.path);
-                    if (isMobileOpen) { // Close sidebar on mobile after navigation
+                    if (isMobileOpen) {
+                      // Close sidebar on mobile after navigation
                       sidebar.setOpen(false);
                     }
                   }}
@@ -78,19 +104,22 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               ))}
             </div>
           </SidebarContent>
-
           <SidebarFooter className="p-4 bg-neutral-800 text-neutral-400 text-sm border-t border-neutral-700">
             Copyright PK @2025
           </SidebarFooter>
-
           {/* Desktop Sidebar Toggle (hidden on mobile) */}
           {/* This SidebarRail needs to be correctly positioned relative to Sidebar,
               often outside the main Sidebar element if it's truly a 'rail' for toggling.
               Assuming it's meant for desktop collapse/expand only.
               For an `offcanvas` variant, this might behave differently.
               Let's keep it but ensure it's hidden on small screens. */}
-          <SidebarRail className="hidden md:block border-r border-neutral-700"> {/* Hidden on mobile */}
-            <SidebarTrigger className="m-2 p-2 rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors shadow-md">
+          <SidebarRail className="hidden md:block border-r border-neutral-700">
+            {" "}
+            {/* Hidden on mobile */}
+            <SidebarTrigger
+              onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
+              className="p-2 rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors shadow-md border border-neutral-600"
+            >
               <FaArrowRightLong
                 className={`text-sky-400 transition-transform duration-200 ${
                   isCollapsed ? "rotate-180" : "rotate-0"
@@ -99,17 +128,30 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
             </SidebarTrigger>
           </SidebarRail>
         </Sidebar>
-
-        <SidebarInset className="flex-1 flex flex-col"> {/* flex-1 to make main content take remaining space */}
+        <SidebarInset className="flex-1 flex flex-col">
+          {" "}
+          {/* flex-1 to make main content take remaining space */}
           {/* Mobile Sidebar Trigger (Hamburger Menu) */}
           <div className="p-4 md:hidden flex items-center justify-between bg-neutral-800 border-b border-neutral-700">
             <SidebarTrigger className="flex items-center gap-2 text-sky-400 bg-neutral-700 rounded-md p-2 shadow-sm hover:bg-neutral-600 transition-colors">
               <FaBars className="text-xl" /> {/* Hamburger icon */}
             </SidebarTrigger>
-            <span className="text-xl font-bold text-sky-400">Peak Productivity</span> {/* Mobile Header Title */}
+            <span
+              className="text-xl font-bold text-sky-400 cursor-pointer"
+              onClick={() => {
+                navigate("/"); // This line navigates to the home screen
+                if (open) {
+                  setOpen(false); // Close sidebar after navigation on mobile
+                }
+              }}
+            >
+              Peak Productivity
+            </span>
+            {/* Mobile Header Title */}
           </div>
-
-          <main className="flex-1 h-full overflow-y-auto bg-neutral-900 p-4 md:p-6">{children}</main>
+          <main className="flex-1 h-full overflow-y-auto bg-neutral-900 p-4 md:p-6">
+            {children}
+          </main>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -66,20 +66,25 @@ const TaskCard = ({
           >
             {todo.task}
           </p>
-          <p className="text-sm text-neutral-400 mt-1">
-            Added: {new Date(todo.timeAndDate).toLocaleString()}
-          </p>
-          <div className="flex gap-1" >
-          {startDate && (
-            <p className="text-sm text-neutral-400 mt-0.5">
-              From: {startDate.toLocaleDateString()}
+          <div className="flex gap-2">
+            <p className="text-sm text-neutral-400 mt-1">
+              <span className="font-bold">Created At</span>:{" "}
+              {new Date(todo.timeAndDate).toLocaleString()}
             </p>
-          )}
-          {endDate && (
-            <p className="text-sm text-neutral-400 mt-0.5">
-              To: {endDate.toLocaleDateString()}
-            </p>
-          )}
+            <div className="flex gap-1">
+              {startDate && (
+                <p className="text-sm text-neutral-400 mt-0.5">
+                  <span className="font-bold">From</span>:{" "}
+                  {startDate.toLocaleDateString()}
+                </p>
+              )}
+              {endDate && (
+                <p className="text-sm text-neutral-400 mt-0.5">
+                  <span className="font-bold">To</span>:{" "}
+                  {endDate.toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
           <span
             className={`mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full ${
@@ -94,7 +99,9 @@ const TaskCard = ({
       </div>
 
       {/* Right Side: Date Pickers, Priority, Edit, Delete - ALL IN ONE ROW */}
-      <div className="flex flex-wrap items-center gap-2 ml-auto"> {/* Adjusted gap, removed md:gap-4 for consistency */}
+      <div className="flex flex-wrap items-center gap-2 ml-auto">
+        {" "}
+        {/* Adjusted gap, removed md:gap-4 for consistency */}
         {/* Date pickers component. It will now lay out its buttons horizontally internally. */}
         <DateRangePicker
           startDate={startDate}
@@ -102,7 +109,6 @@ const TaskCard = ({
           onStartDateChange={setStartDate}
           onEndDateChange={setEndDate}
         />
-
         <Select
           value={todo.priority ?? ""}
           onValueChange={(value) => onSetPriority(value)}
@@ -122,9 +128,10 @@ const TaskCard = ({
             ))}
           </SelectContent>
         </Select>
-
         {/* Action Icons */}
-        <div className="flex items-center gap-2"> {/* Consistent gap */}
+        <div className="flex items-center gap-2">
+          {" "}
+          {/* Consistent gap */}
           <BsFillPencilFill
             className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
             onClick={onEdit}

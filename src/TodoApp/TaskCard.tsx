@@ -1,3 +1,4 @@
+// src/TaskCard.tsx
 import {
   Select,
   SelectTrigger,
@@ -11,6 +12,16 @@ import { priorityLabels } from "@/const/const";
 import DateRangePicker from "./CalanderPicker"; // Assuming CalanderPicker.tsx is now DateRangePicker.tsx
 import { useState } from "react";
 import type { ITodo } from "@/features/Todos/TodoSlice";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+
+// Utility function to truncate text
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength - 4) + "...."; // -4 for the dots
+};
+
 
 type TaskCardProps = {
   todo: ITodo;
@@ -29,6 +40,7 @@ const TaskCard = ({
 }: TaskCardProps) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const getPriorityBorderColor = (priority: string | undefined) => {
     if (!priority) return "border-l-4 border-neutral-700";
@@ -43,6 +55,12 @@ const TaskCard = ({
         return "border-l-4 border-neutral-700";
     }
   };
+
+  const handleTaskTextClick = () => {
+    // Assuming taskId is part of the todo object
+    navigate(`/task/${todo.id}`); // Navigate to a specific task page
+  };
+
 
   return (
     <div
@@ -60,18 +78,19 @@ const TaskCard = ({
         />
         <div>
           <p
-            className={`font-medium text-lg ${
+            className={`font-medium text-lg cursor-pointer ${ // Added cursor-pointer
               todo.isDone ? "line-through text-neutral-400" : "text-amber-50"
             }`}
+            onClick={handleTaskTextClick} // Add onClick handler
           >
-            {todo.task}
+            {truncateText(todo.task, 44)} {/* Apply truncation */}
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap"> {/* Added flex-wrap here for overall info block */}
             <p className="text-sm text-neutral-400 mt-1">
               <span className="font-bold">Created At</span>:{" "}
               {new Date(todo.timeAndDate).toLocaleString()}
             </p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap"> {/* Keep flex-wrap for date displays */}
               {startDate && (
                 <p className="text-sm text-neutral-400 mt-0.5">
                   <span className="font-bold">From</span>:{" "}
@@ -100,9 +119,6 @@ const TaskCard = ({
 
       {/* Right Side: Date Pickers, Priority, Edit, Delete - ALL IN ONE ROW */}
       <div className="flex flex-wrap items-center gap-2 ml-auto">
-        {" "}
-        {/* Adjusted gap, removed md:gap-4 for consistency */}
-        {/* Date pickers component. It will now lay out its buttons horizontally internally. */}
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
@@ -130,8 +146,6 @@ const TaskCard = ({
         </Select>
         {/* Action Icons */}
         <div className="flex items-center gap-2">
-          {" "}
-          {/* Consistent gap */}
           <BsFillPencilFill
             className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
             onClick={onEdit}

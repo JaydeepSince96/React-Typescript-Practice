@@ -11,7 +11,7 @@ import { z } from "zod";
 import { updateTodo } from "@/features/Todos/TodoSlice";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import TodoDialogForm from "./TaskDialogForm";
+import TaskDialogForm from "./TaskDialogForm";
 import { setPriority } from "@/features/Todos/TodoSlice";
 import { priorityLabels } from "@/const/const";
 import { useNavigate } from "react-router-dom";
@@ -26,8 +26,8 @@ import {
   PaginationNext,
 } from "@/components/ui/pagination";
 import { SidebarLayout } from "@/layout/SidebarLayout";
-import { FaPlus } from "react-icons/fa"; // For the new "Add New Task" button icon
-import { TbListSearch } from "react-icons/tb"; // New icon for "No Tasks"
+import { FaPlus } from "react-icons/fa";
+import { TbListSearch } from "react-icons/tb";
 
 export default function Tasks() {
   const [open, setOpen] = useState(false);
@@ -67,7 +67,6 @@ export default function Tasks() {
     dispatch(deleteTodo(id));
   }
 
-  // Helper function to get priority button classes
   const getPriorityButtonClasses = (priorityValue: string) => {
     const baseClasses =
       "m-1 px-4 py-2 rounded-full font-semibold transition-colors duration-200";
@@ -95,7 +94,7 @@ export default function Tasks() {
 
   return (
     <SidebarLayout>
-      <div className="p-6 bg-neutral-900 min-h-screen">
+      <div className="p-6 bg-neutral-900 min-h-screen flex flex-col">
         <div className="flex justify-start gap-2 mb-6">
           <div className="priority flex flex-wrap">
             {priorityLabels.map((item) => (
@@ -112,9 +111,7 @@ export default function Tasks() {
           </div>
         </div>
 
-        <div className="space-y-4 p-4 min-h-[400px]">
-          {" "}
-          {/* Added min-height for consistent layout */}
+        <div className="flex-1 flex flex-col p-4">
           {paginatedTodos.length === 0 ? (
             <div className="text-center py-20 flex flex-col items-center justify-center">
               <TbListSearch className="size-20 text-neutral-600 mb-4" />
@@ -126,45 +123,48 @@ export default function Tasks() {
               </p>
             </div>
           ) : (
-            paginatedTodos.map((todo) => (
-              <TaskCard
-                key={todo.id}
-                todo={todo}
-                onToggle={() => dispatch(toggleTodo(todo.id))}
-                onSetPriority={(priority) =>
-                  dispatch(
-                    setPriority({
-                      id: todo.id,
-                      priority: priority as PriorityLevel,
-                    })
-                  )
-                }
-                onEdit={() => {
-                  setEditTodo(todo);
-                  form.setValue("task", todo.task);
-                  setOpen(true);
-                }}
-                onDelete={() => handleTodoDelete(todo.id)}
-              />
-            ))
+            <div className="space-y-4 w-full">
+              {paginatedTodos.map((todo) => (
+                <TaskCard
+                  key={todo.id}
+                  todo={todo}
+                  onToggle={() => dispatch(toggleTodo(todo.id))}
+                  onSetPriority={(priority) =>
+                    dispatch(
+                      setPriority({
+                        id: todo.id,
+                        priority: priority as PriorityLevel,
+                      })
+                    )
+                  }
+                  onEdit={() => {
+                    setEditTodo(todo);
+                    form.setValue("task", todo.task);
+                    setOpen(true);
+                  }}
+                  onDelete={() => handleTodoDelete(todo.id)}
+                />
+              ))}
+            </div>
           )}
         </div>
 
+        {/* Floating Add New Task Button */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
               onClick={() => {
                 setOpen(true);
-                setEditTodo(null); // Clear edit state when opening for new task
-                form.reset(); // Reset form when adding new task
+                setEditTodo(null);
+                form.reset();
               }}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 mt-8 md:mt-0 float-right mr-4" // Floating action button style
+              className="fixed bottom-6 right-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 z-40"
             >
               <FaPlus className="size-4" />
               Add New Task
             </Button>
           </DialogTrigger>
-          <TodoDialogForm onSubmit={onSubmit} form={form} />
+          <TaskDialogForm onSubmit={onSubmit} form={form} />
         </Dialog>
 
         {totalPages > 1 && (

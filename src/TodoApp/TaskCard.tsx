@@ -5,11 +5,10 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-// import { Input } from "@/components/ui/input";
 import { BsFillPencilFill } from "react-icons/bs";
 import { MdOutlineDelete } from "react-icons/md";
 import { priorityLabels } from "@/const/const";
-import CalendarPicker from "./CalanderPicker";
+import DateRangePicker from "./CalanderPicker"; // Assuming CalanderPicker.tsx is now DateRangePicker.tsx
 import { useState } from "react";
 import type { ITodo } from "@/features/Todos/TodoSlice";
 
@@ -28,21 +27,20 @@ const TaskCard = ({
   onEdit,
   onDelete,
 }: TaskCardProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
-  // Determine card border color based on priority for visual emphasis
   const getPriorityBorderColor = (priority: string | undefined) => {
-    // Updated to accept undefined
-    if (!priority) return "border-l-4 border-neutral-700"; // Handle undefined case
+    if (!priority) return "border-l-4 border-neutral-700";
     switch (priority) {
       case "High":
-        return "border-l-4 border-red-500"; // Muted red for High
+        return "border-l-4 border-red-500";
       case "Medium":
-        return "border-l-4 border-yellow-500"; // Muted yellow for Medium
+        return "border-l-4 border-yellow-500";
       case "Low":
-        return "border-l-4 border-blue-500"; // Muted blue for Low
+        return "border-l-4 border-blue-500";
       default:
-        return "border-l-4 border-neutral-700"; // Default border
+        return "border-l-4 border-neutral-700";
     }
   };
 
@@ -54,12 +52,11 @@ const TaskCard = ({
     >
       {/* Left Side: Checkbox and Text Info */}
       <div className="flex items-start gap-4">
-        {/* Custom styled checkbox for better appearance */}
         <input
           type="checkbox"
           checked={todo.isDone}
           onChange={onToggle}
-          className="mt-1 size-5 accent-sky-500 focus:ring-sky-500 border-neutral-600 rounded" // Tailwind for custom checkbox look
+          className="mt-1 size-5 accent-sky-500 focus:ring-sky-500 border-neutral-600 rounded"
         />
         <div>
           <p
@@ -72,6 +69,18 @@ const TaskCard = ({
           <p className="text-sm text-neutral-400 mt-1">
             Added: {new Date(todo.timeAndDate).toLocaleString()}
           </p>
+          <div className="flex gap-1" >
+          {startDate && (
+            <p className="text-sm text-neutral-400 mt-0.5">
+              From: {startDate.toLocaleDateString()}
+            </p>
+          )}
+          {endDate && (
+            <p className="text-sm text-neutral-400 mt-0.5">
+              To: {endDate.toLocaleDateString()}
+            </p>
+          )}
+          </div>
           <span
             className={`mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full ${
               todo.isDone
@@ -84,21 +93,23 @@ const TaskCard = ({
         </div>
       </div>
 
-      {/* Right Side: Date Picker, Priority, Edit, Delete */}
-      <div className="flex items-center gap-4">
-        <CalendarPicker
-          selectedDate={selectedDate} // This state needs to be lifted or handled for persistence
-          onChange={setSelectedDate}
+      {/* Right Side: Date Pickers, Priority, Edit, Delete - ALL IN ONE ROW */}
+      <div className="flex flex-wrap items-center gap-2 ml-auto"> {/* Adjusted gap, removed md:gap-4 for consistency */}
+        {/* Date pickers component. It will now lay out its buttons horizontally internally. */}
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
         />
+
         <Select
-          // FIX: Provide a fallback empty string if todo.priority is undefined
           value={todo.priority ?? ""}
           onValueChange={(value) => onSetPriority(value)}
         >
-          <SelectTrigger className="w-[120px] bg-neutral-700 border-neutral-600 text-white hover:border-sky-500 transition-colors">
-            <SelectValue placeholder="Set Priority" />
+          <SelectTrigger className="w-[100px] bg-neutral-700 border-neutral-600 text-white hover:border-sky-500 transition-colors">
+            <SelectValue placeholder="Priority" />
           </SelectTrigger>
-          {/* SelectContent needs to be styled in components/ui/select if not already */}
           <SelectContent className="bg-neutral-700 border-neutral-600 text-white">
             {priorityLabels.map((label) => (
               <SelectItem
@@ -112,14 +123,17 @@ const TaskCard = ({
           </SelectContent>
         </Select>
 
-        <BsFillPencilFill
-          className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
-          onClick={onEdit}
-        />
-        <MdOutlineDelete
-          className="cursor-pointer size-6 text-neutral-400 hover:text-red-500 transition-colors"
-          onClick={onDelete}
-        />
+        {/* Action Icons */}
+        <div className="flex items-center gap-2"> {/* Consistent gap */}
+          <BsFillPencilFill
+            className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
+            onClick={onEdit}
+          />
+          <MdOutlineDelete
+            className="cursor-pointer size-6 text-neutral-400 hover:text-red-500 transition-colors"
+            onClick={onDelete}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,23 +28,95 @@ import {
 import { SidebarLayout } from "@/layout/SidebarLayout";
 import { FaPlus } from "react-icons/fa";
 import { TbListSearch } from "react-icons/tb";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import DateRangePicker from "./CalanderPicker";
+import { IoFilter } from "react-icons/io5";
 
 export default function Tasks() {
   const [open, setOpen] = useState(false);
   const [editTodo, setEditTodo] = useState<ITodo | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    searchId: "",
+    priority: "All",
+    status: "All",
+    startDate: null as Date | null,
+    endDate: null as Date | null,
+  });
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const todoText = useSelector((text: RootState) => text.todo);
+  const todoText = useSelector((state: RootState) => state.todo);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
-  const totalTodos = todoText.length;
+
+  const filteredTodos = useMemo(() => {
+    return todoText.filter((todo) => {
+      const { searchId, priority, status, startDate, endDate } = filters;
+
+      if (searchId && !todo.id.toString().includes(searchId)) {
+        return false;
+      }
+
+      if (priority !== "All" && todo.priority !== priority) {
+        return false;
+      }
+
+      if (status !== "All") {
+        if (status === "Done" && !todo.isDone) return false;
+        if (status === "Pending" && todo.isDone) return false;
+      }
+
+      if (startDate && new Date(todo.timeAndDate) < startDate) {
+        return false;
+      }
+      if (endDate) {
+        const adjustedEndDate = new Date(endDate);
+        adjustedEndDate.setHours(23, 59, 59, 999); // Include the entire end day
+        if (new Date(todo.timeAndDate) > adjustedEndDate) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [todoText, filters]);
+
+  const totalTodos = filteredTodos.length;
   const totalPages = Math.ceil(totalTodos / itemsPerPage);
 
-  const paginatedTodos = todoText.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedTodos = useMemo(() => {
+     return filteredTodos.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredTodos, currentPage]);
+
+
+  React.useEffect(() => {
+    if(currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    } else if (totalPages === 0) {
+        setCurrentPage(1);
+    }
+  }, [filters, totalPages, currentPage]);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,7 +167,7 @@ export default function Tasks() {
   return (
     <SidebarLayout>
       <div className="p-6 bg-neutral-900 min-h-screen flex flex-col">
-        <div className="flex justify-start gap-2 mb-6">
+        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div className="priority flex flex-wrap">
             {priorityLabels.map((item) => (
               <button
@@ -109,6 +181,125 @@ export default function Tasks() {
               </button>
             ))}
           </div>
+          <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white"
+              >
+                <IoFilter className="mr-2 size-4" />
+                Filter Tasks
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="bg-neutral-800 border-l border-neutral-700 text-white w-full sm:max-w-md overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle className="text-sky-400 text-2xl">
+                  Filter Tasks
+                </SheetTitle>
+              </SheetHeader>
+              <div className="p-6 space-y-6">
+                <div>
+                  <Label htmlFor="searchId" className="text-neutral-300">
+                    Search by Task ID
+                  </Label>
+                  <Input
+                    id="searchId"
+                    placeholder="Enter Task ID..."
+                    value={filters.searchId}
+                    onChange={(e) =>
+                      setFilters({ ...filters, searchId: e.target.value })
+                    }
+                    className="bg-neutral-700 border-neutral-600 mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="priority" className="text-neutral-300">
+                    Priority
+                  </Label>
+                  <Select
+                    value={filters.priority}
+                    onValueChange={(value) =>
+                      setFilters({ ...filters, priority: value })
+                    }
+                  >
+                    <SelectTrigger
+                      id="priority"
+                      className="w-full mt-2 bg-neutral-700 border-neutral-600"
+                    >
+                      <SelectValue placeholder="Select Priority" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
+                      <SelectItem value="All">All Priorities</SelectItem>
+                      <SelectItem value="High">High</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="status" className="text-neutral-300">
+                    Status
+                  </Label>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) =>
+                      setFilters({ ...filters, status: value })
+                    }
+                  >
+                    <SelectTrigger
+                      id="status"
+                      className="w-full mt-2 bg-neutral-700 border-neutral-600"
+                    >
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
+                      <SelectItem value="All">All Statuses</SelectItem>
+                      <SelectItem value="Done">Done</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-neutral-300">
+                    Filter by Creation Date
+                  </Label>
+                  <div className="mt-2">
+                    <DateRangePicker
+                      startDate={filters.startDate}
+                      endDate={filters.endDate}
+                      onStartDateChange={(date) =>
+                        setFilters({ ...filters, startDate: date })
+                      }
+                      onEndDateChange={(date) =>
+                        setFilters({ ...filters, endDate: date })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+              <SheetFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setFilters({
+                      searchId: "",
+                      priority: "All",
+                      status: "All",
+                      startDate: null,
+                      endDate: null,
+                    });
+                    setIsFilterOpen(false);
+                  }}
+                  className="w-full bg-neutral-700 hover:bg-neutral-600 border-neutral-600"
+                >
+                  Clear Filters
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </div>
 
         <div className="flex-1 flex flex-col p-4">
@@ -116,10 +307,10 @@ export default function Tasks() {
             <div className="text-center py-20 flex flex-col items-center justify-center">
               <TbListSearch className="size-20 text-neutral-600 mb-4" />
               <p className="text-neutral-400 text-xl font-semibold">
-                No tasks yet. Let's get productive!
+                No tasks match your filters.
               </p>
               <p className="text-neutral-500 mt-2">
-                Click "Add New Task" to begin organizing your day.
+                Try adjusting your filters or adding new tasks.
               </p>
             </div>
           ) : (
@@ -149,7 +340,6 @@ export default function Tasks() {
           )}
         </div>
 
-        {/* Floating Add New Task Button */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -164,7 +354,11 @@ export default function Tasks() {
               Add New Task
             </Button>
           </DialogTrigger>
-          <TaskDialogForm onSubmit={onSubmit} form={form} />
+          <TaskDialogForm
+            onSubmit={onSubmit}
+            form={form}
+            isEditing={!!editTodo}
+          />
         </Dialog>
 
         {totalPages > 1 && (

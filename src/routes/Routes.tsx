@@ -3,26 +3,29 @@ import { createBrowserRouter } from "react-router-dom";
 import Tasks from "@/TodoApp/Tasks";
 import Priority from "@/TodoApp/priority-wise/Priority";
 import AllCharts from "@/TodoApp/AllChart";
-// You'll need to create this TaskDetailPage component
 import TaskDetails from "@/TodoApp/TaskDetails";
-
+import TaskReport from "@/TodoApp/TaskReport"; // Import the new component
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Tasks/>,
+    element: <Tasks />,
   },
   {
     path: "/priority",
-    element: <Priority/>,
+    element: <Priority />,
   },
   {
-    path:"/chart",
-    element: <AllCharts/>
+    path: "/chart",
+    element: <AllCharts />,
   },
   {
-    // New route for individual task details
+    // This path now correctly points to the new TaskReport component
+    path: "/tasks",
+    element: <TaskReport />,
+  },
+  {
     path: "/task/:id",
-    element: <TaskDetails />, // You need to create this component
-  }
+    element: <TaskDetails />,
+  },
 ]);

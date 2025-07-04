@@ -77,7 +77,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               }
             }}
           >
-            {isDesktopCollapsed ? "PP" : "Peak Productivity"}
+            {isDesktopCollapsed ? "TaskSync" : "TaskSync"}
           </SidebarHeader>
           <SidebarContent className="bg-neutral-800 flex-grow py-4">
             <div className="flex flex-col gap-2 p-2">

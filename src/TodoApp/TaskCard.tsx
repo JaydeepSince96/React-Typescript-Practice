@@ -13,6 +13,7 @@ import DateRangePicker from "./CalanderPicker"; // Assuming CalanderPicker.tsx i
 import { useState } from "react";
 import type { ITodo } from "@/features/Todos/TodoSlice";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { cn } from "@/lib/utils";
 
 // Utility function to truncate text
 const truncateText = (text: string, maxLength: number) => {
@@ -64,9 +65,10 @@ const TaskCard = ({
 
   return (
     <div
-      className={`relative border border-neutral-700 p-4 rounded-lg flex items-start justify-between gap-4 bg-neutral-800 shadow-md transition-all duration-200 ${getPriorityBorderColor(
-        todo.priority
-      )}`}
+      className={cn(
+        "relative border border-neutral-700 p-4 rounded-lg flex items-start justify-between gap-4 bg-neutral-800 shadow-md transition-all duration-200",
+        getPriorityBorderColor(todo.priority)
+      )}
     >
       {/* Left Side: Checkbox and Text Info */}
       <div className="flex items-start gap-4">

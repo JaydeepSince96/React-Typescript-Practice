@@ -110,7 +110,7 @@ export default function Tasks() {
     const colorMap: { [key: string]: string } = {
       High: "bg-red-700/40 text-red-300 hover:bg-red-600/60 border border-red-700",
       Medium: "bg-yellow-700/40 text-yellow-300 hover:bg-yellow-600/60 border border-yellow-700",
-      Low: "bg-blue-700/40 text-blue-300 hover:bg-blue-600/60 border border-blue-700",
+      Low: "bg-blue-500/40 text-blue-300 hover:bg-blue-500/60 border border-blue-500",
     };
     return `${baseClasses} ${colorMap[priorityValue] || 'bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600'}`;
   };

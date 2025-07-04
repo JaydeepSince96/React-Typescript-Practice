@@ -17,9 +17,9 @@ import type { ITodo, PriorityLevel } from "@/features/Todos/TodoSlice";
 import { formSchema } from "@/schema/TodoFormSchema";
 import { z } from "zod";
 
-import TaskCard from "../TaskCard";
+import TaskCard from "../common/TaskCard";
 import { Dialog } from "@/components/ui/dialog";
-import TodoDialogForm from "../TaskDialogForm";
+import TodoDialogForm from "../common/TaskDialogForm";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5"; // For a more elegant back icon
 import { SidebarLayout } from "@/layout/SidebarLayout"; // Ensure SidebarLayout wraps this

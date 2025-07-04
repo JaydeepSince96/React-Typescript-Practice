@@ -1,5 +1,5 @@
 import React from "react";
-import TaskCard from "./TaskCard";
+import TaskCard from "./common/TaskCard";
 import { TbListSearch } from "react-icons/tb";
 import type { ITodo, PriorityLevel } from "@/features/Todos/TodoSlice";
 import { useDispatch } from "react-redux";

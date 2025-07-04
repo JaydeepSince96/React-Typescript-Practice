@@ -60,7 +60,7 @@ const StatCard = ({
   </div>
 );
 
-const AllCharts: React.FC = () => {
+const ProductivityReports: React.FC = () => {
   const navigate = useNavigate();
   const todos = useSelector((state: RootState) => state.todo);
 
@@ -256,4 +256,4 @@ const AllCharts: React.FC = () => {
   );
 };
 
-export default AllCharts;
+export default ProductivityReports;

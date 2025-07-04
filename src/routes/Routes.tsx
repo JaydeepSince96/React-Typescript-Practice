@@ -2,9 +2,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import Tasks from "@/TodoApp/Tasks";
 import Priority from "@/TodoApp/priority-wise/Priority";
-import AllCharts from "@/TodoApp/AllChart";
+import ProductivityReports from "@/TodoApp/reports/ProductivityReports";
 import TaskDetails from "@/TodoApp/TaskDetails";
-import TaskReport from "@/TodoApp/TaskReport"; // Import the new component
+import TaskReport from "@/TodoApp/reports/TaskReport"; 
 
 export const router = createBrowserRouter([
   {
@@ -17,10 +17,9 @@ export const router = createBrowserRouter([
   },
   {
     path: "/chart",
-    element: <AllCharts />,
+    element: <ProductivityReports />,
   },
   {
-    // This path now correctly points to the new TaskReport component
     path: "/tasks",
     element: <TaskReport />,
   },

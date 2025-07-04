@@ -13,7 +13,7 @@ import {
   addNewSubtask,
 } from "@/features/Todos/TodoSlice";
 import type { ISubtask } from "@/features/Todos/TodoSlice";
-import TaskDialogForm from "./TaskDialogForm";
+import TaskDialogForm from "./common/TaskDialogForm";
 import { formSchema } from "@/schema/TodoFormSchema";
 import { z } from "zod";
 import {

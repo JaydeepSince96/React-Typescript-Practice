@@ -10,7 +10,7 @@ import type { ITodo } from "@/features/Todos/TodoSlice";
 import { z } from "zod";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import TaskDialogForm from "./TaskDialogForm";
+import TaskDialogForm from "./common/TaskDialogForm";
 import { priorityLabels } from "@/const/const";
 import { useNavigate } from "react-router-dom";
 import {

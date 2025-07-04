@@ -57,7 +57,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         selectsEnd
         startDate={startDate}
         endDate={endDate}
-        minDate={startDate} // Ensures end date is not before start date
+        minDate={startDate || undefined}
         dateFormat="dd/MM/yyyy"
         placeholderText="To Date"
         customInput={<CustomDateInput />}

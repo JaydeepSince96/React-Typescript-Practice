@@ -16,6 +16,8 @@ export interface ITodo {
   timeAndDate: string;
   priority?: PriorityLevel;
   subtasks: ISubtask[];
+  startDate?: string | null; // Add this
+  endDate?: string | null; // Add this
 }
 
 const initialState: ITodo[] = [];
@@ -24,16 +26,26 @@ export const todoSlice = createSlice({
   name: "todos",
   initialState,
   reducers: {
-    addNewTodo: (state, action: PayloadAction<string>) => {
+    addNewTodo: (
+      state,
+      action: PayloadAction<{
+        task: string;
+        startDate?: Date | null;
+        endDate?: Date | null;
+      }>
+    ) => {
       const newTodo: ITodo = {
         id: Date.now(),
-        task: action.payload,
+        task: action.payload.task,
         isDone: false,
         timeAndDate: new Date().toISOString(),
         subtasks: [],
+        startDate: action.payload.startDate?.toISOString(),
+        endDate: action.payload.endDate?.toISOString(),
       };
       state.push(newTodo);
     },
+    // ... (rest of the reducers are the same)
     toggleTodo: (state, action: PayloadAction<number>) => {
       const todo = state.find((t) => t.id === action.payload);
       if (todo) {
@@ -121,6 +133,7 @@ export const todoSlice = createSlice({
     },
   },
 });
+
 
 // Export actions
 export const {

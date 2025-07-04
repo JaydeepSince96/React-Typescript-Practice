@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DateRangePicker from "./common/CalanderPicker";
+import SingleDatePicker from "./common/SingleDatePicker"; // Updated import
 import { IoFilter } from "react-icons/io5";
 
 // Define the shape of the filters
@@ -137,16 +137,17 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
 
           <div>
             <Label className="text-neutral-300">Filter by Creation Date</Label>
-            <div className="mt-2">
-              <DateRangePicker
-                startDate={filters.startDate}
-                endDate={filters.endDate}
-                onStartDateChange={(date) =>
-                  setFilters((prev) => ({ ...prev, startDate: date }))
-                }
-                onEndDateChange={(date) =>
-                  setFilters((prev) => ({ ...prev, endDate: date }))
-                }
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <SingleDatePicker
+                selected={filters.startDate}
+                onChange={(date) => setFilters(prev => ({...prev, startDate: date}))}
+                placeholderText="From Date"
+              />
+              <SingleDatePicker
+                selected={filters.endDate}
+                onChange={(date) => setFilters(prev => ({...prev, endDate: date}))}
+                placeholderText="To Date"
+                minDate={filters.startDate || undefined}
               />
             </div>
           </div>

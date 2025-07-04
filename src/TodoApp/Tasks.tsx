@@ -81,12 +81,18 @@ export default function Tasks() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { task: "" },
+    defaultValues: {
+      task: "",
+      startDate: null,
+      endDate: null,
+    },
   });
 
   const handleEdit = (todo: ITodo) => {
     setEditTodo(todo);
     form.setValue("task", todo.task);
+    form.setValue("startDate", todo.startDate ? new Date(todo.startDate) : null);
+    form.setValue("endDate", todo.endDate ? new Date(todo.endDate) : null);
     setOpen(true);
   };
 
@@ -98,7 +104,7 @@ export default function Tasks() {
     if (editTodo) {
       dispatch(updateTodo({ id: editTodo.id, task: data.task }));
     } else {
-      dispatch(addNewTodo(data.task));
+      dispatch(addNewTodo(data));
     }
     form.reset();
     setEditTodo(null);
@@ -106,13 +112,20 @@ export default function Tasks() {
   };
 
   const getPriorityButtonClasses = (priorityValue: string) => {
-    const baseClasses = "m-1 px-4 py-2 rounded-full font-semibold transition-colors duration-200";
+    const baseClasses =
+      "m-1 px-4 py-2 rounded-full font-semibold transition-colors duration-200";
     const colorMap: { [key: string]: string } = {
-      High: "bg-red-700/40 text-red-300 hover:bg-red-600/60 border border-red-700",
-      Medium: "bg-yellow-700/40 text-yellow-300 hover:bg-yellow-600/60 border border-yellow-700",
-      Low: "bg-blue-500/40 text-blue-300 hover:bg-blue-500/60 border border-blue-500",
+      High:
+        "bg-red-700/40 text-red-300 hover:bg-red-600/60 border border-red-700",
+      Medium:
+        "bg-yellow-700/40 text-yellow-300 hover:bg-yellow-600/60 border border-yellow-700",
+      Low:
+        "bg-blue-500/40 text-blue-300 hover:bg-blue-500/60 border border-blue-500",
     };
-    return `${baseClasses} ${colorMap[priorityValue] || 'bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600'}`;
+    return `${baseClasses} ${
+      colorMap[priorityValue] ||
+      "bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600"
+    }`;
   };
 
   return (
@@ -124,7 +137,9 @@ export default function Tasks() {
               <button
                 className={getPriorityButtonClasses(item.value)}
                 key={item.value}
-                onClick={() => navigate(`/priority?level=${encodeURIComponent(item.value)}`)}
+                onClick={() =>
+                  navigate(`/priority?level=${encodeURIComponent(item.value)}`)
+                }
               >
                 {item.value}
               </button>
@@ -139,7 +154,11 @@ export default function Tasks() {
         </header>
 
         <main className="flex-1 flex flex-col p-4">
-          <TaskList tasks={paginatedTodos} onEdit={handleEdit} onDelete={handleDelete} />
+          <TaskList
+            tasks={paginatedTodos}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </main>
 
         <Dialog open={open} onOpenChange={setOpen}>
@@ -156,7 +175,11 @@ export default function Tasks() {
               Add New Task
             </Button>
           </DialogTrigger>
-          <TaskDialogForm onSubmit={onSubmit} form={form} isEditing={!!editTodo} />
+          <TaskDialogForm
+            onSubmit={onSubmit}
+            form={form}
+            isEditing={!!editTodo}
+          />
         </Dialog>
 
         {totalPages > 1 && (
@@ -164,17 +187,26 @@ export default function Tasks() {
             <Pagination>
               <PaginationContent className="bg-neutral-800 rounded-lg p-2 shadow-inner border border-neutral-700">
                 <PaginationItem>
-                  <PaginationPrevious onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} />
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  />
                 </PaginationItem>
                 {[...Array(totalPages)].map((_, i) => (
                   <PaginationItem key={i}>
-                    <PaginationLink isActive={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
                       {i + 1}
                     </PaginationLink>
                   </PaginationItem>
                 ))}
                 <PaginationItem>
-                  <PaginationNext onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} />
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(p + 1, totalPages))
+                    }
+                  />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>

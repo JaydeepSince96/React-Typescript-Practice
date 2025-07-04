@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { formSchema } from "@/schema/TodoFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
+import SingleDatePicker from "./SingleDatePicker";
 
 type TodoDialogFormProps = {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -60,16 +61,57 @@ const TaskDialogForm = ({
                   {label}
                 </FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder={placeholder}
-                    {...field}
-                    rows={5}
-                  />
+                  <Textarea placeholder={placeholder} {...field} rows={5} />
                 </FormControl>
                 <FormMessage className="text-red-400 text-sm" />
               </FormItem>
             )}
           />
+
+          {!isSubtask && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-neutral-300 text-base mb-2">
+                      Start Date
+                    </FormLabel>
+                    <FormControl>
+                      <SingleDatePicker
+                        placeholderText="From Date"
+                        selected={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400 text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-neutral-300 text-base mb-2">
+                      End Date
+                    </FormLabel>
+                    <FormControl>
+                      <SingleDatePicker
+                        placeholderText="To Date"
+                        selected={field.value}
+                        onChange={field.onChange}
+                        minDate={form.watch("startDate") || undefined}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400 text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
           <DialogFooter className="flex justify-end gap-3 pt-4">
             <Button
               type="button"

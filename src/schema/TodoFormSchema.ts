@@ -6,6 +6,14 @@ export const formSchema = z
     startDate: z.date().nullable(),
     endDate: z.date().nullable(),
   })
+  .refine((data) => data.startDate, {
+    message: "Start date is required.",
+    path: ["startDate"],
+  })
+  .refine((data) => data.endDate, {
+    message: "End date is required.",
+    path: ["endDate"],
+  })
   .refine(
     (data) => {
       if (data.startDate && data.endDate) {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -17,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SingleDatePicker from "./common/SingleDatePicker"; // Updated import
-import { IoFilter } from "react-icons/io5";
+import SingleDatePicker from "./common/SingleDatePicker";
+import { IoFilter, IoRefresh, IoCheckmarkCircle } from "react-icons/io5";
 
 // Define the shape of the filters
 interface TaskFilters {
@@ -30,27 +30,42 @@ interface TaskFilters {
 }
 
 interface TaskFilterSidebarProps {
-  filters: TaskFilters;
-  setFilters: React.Dispatch<React.SetStateAction<TaskFilters>>;
+  initialFilters: TaskFilters;
+  onApplyFilters: (filters: TaskFilters) => void;
   isFilterOpen: boolean;
   setIsFilterOpen: (isOpen: boolean) => void;
 }
 
 const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
-  filters,
-  setFilters,
+  initialFilters,
+  onApplyFilters,
   isFilterOpen,
   setIsFilterOpen,
 }) => {
-  const handleClearFilters = () => {
-    setFilters({
+  const [localFilters, setLocalFilters] = useState<TaskFilters>(initialFilters);
+
+  useEffect(() => {
+    if (isFilterOpen) {
+      setLocalFilters(initialFilters);
+    }
+  }, [initialFilters, isFilterOpen]);
+
+  const handleApply = () => {
+    onApplyFilters(localFilters);
+    setIsFilterOpen(false);
+  };
+
+  const handleClear = () => {
+    const clearedFilters = {
       searchId: "",
       priority: "All",
       status: "All",
       startDate: null,
       endDate: null,
-    });
-    setIsFilterOpen(false); // Close sidebar on clear
+    };
+    setLocalFilters(clearedFilters);
+    onApplyFilters(clearedFilters); // Apply cleared filters immediately
+    setIsFilterOpen(false);
   };
 
   return (
@@ -78,9 +93,9 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             <Input
               id="searchId"
               placeholder="Enter Task ID..."
-              value={filters.searchId}
+              value={localFilters.searchId}
               onChange={(e) =>
-                setFilters((prev) => ({ ...prev, searchId: e.target.value }))
+                setLocalFilters((prev) => ({ ...prev, searchId: e.target.value }))
               }
               className="bg-neutral-700 border-neutral-600 mt-2"
             />
@@ -91,9 +106,9 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               Priority
             </Label>
             <Select
-              value={filters.priority}
+              value={localFilters.priority}
               onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, priority: value }))
+                setLocalFilters((prev) => ({ ...prev, priority: value }))
               }
             >
               <SelectTrigger
@@ -116,9 +131,9 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               Status
             </Label>
             <Select
-              value={filters.status}
+              value={localFilters.status}
               onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, status: value }))
+                setLocalFilters((prev) => ({ ...prev, status: value }))
               }
             >
               <SelectTrigger
@@ -139,25 +154,33 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             <Label className="text-neutral-300">Filter by Creation Date</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               <SingleDatePicker
-                selected={filters.startDate}
-                onChange={(date) => setFilters(prev => ({...prev, startDate: date}))}
+                selected={localFilters.startDate}
+                onChange={(date) => setLocalFilters(prev => ({...prev, startDate: date}))}
                 placeholderText="From Date"
               />
               <SingleDatePicker
-                selected={filters.endDate}
-                onChange={(date) => setFilters(prev => ({...prev, endDate: date}))}
+                selected={localFilters.endDate}
+                onChange={(date) => setLocalFilters(prev => ({...prev, endDate: date}))}
                 placeholderText="To Date"
-                minDate={filters.startDate || undefined}
+                minDate={localFilters.startDate || undefined}
               />
             </div>
           </div>
         </div>
-        <SheetFooter className="p-6">
+        <SheetFooter className="flex flex-col gap-3 p-6 pt-4 border-t border-neutral-700">
+          <Button
+            onClick={handleApply}
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3"
+          >
+            <IoCheckmarkCircle className="mr-2 size-5" />
+            Apply Filters
+          </Button>
           <Button
             variant="outline"
-            onClick={handleClearFilters}
-            className="w-full bg-neutral-700 hover:bg-neutral-600 border-neutral-600"
+            onClick={handleClear}
+            className="w-full bg-neutral-700 hover:bg-neutral-600 border-neutral-600 py-3"
           >
+            <IoRefresh className="mr-2 size-5" />
             Clear Filters
           </Button>
         </SheetFooter>

@@ -110,6 +110,10 @@ export default function Tasks() {
     setEditTodo(null);
     setOpen(false);
   };
+  
+  const handleApplyFilters = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+  };
 
   const getPriorityButtonClasses = (priorityValue: string) => {
     const baseClasses =
@@ -146,8 +150,8 @@ export default function Tasks() {
             ))}
           </div>
           <TaskFilterSidebar
-            filters={filters}
-            setFilters={setFilters}
+            initialFilters={filters}
+            onApplyFilters={handleApplyFilters}
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
           />

@@ -1,18 +1,40 @@
 import React from "react";
 import TaskCard from "./common/TaskCard";
 import { TbListSearch } from "react-icons/tb";
-import type { ITodo, PriorityLevel } from "@/features/Todos/TodoSlice";
-import { useDispatch } from "react-redux";
-import { toggleTodo, setPriority } from "@/features/Todos/TodoSlice";
+import type { ITask, TaskLabel } from "@/api/types";
+import { useToggleTaskCompletion, useUpdateTaskLabel } from "@/hooks/useApiHooks";
 
 interface TaskListProps {
-  tasks: ITodo[];
-  onEdit: (todo: ITodo) => void;
-  onDelete: (id: number) => void;
+  tasks: ITask[];
+  onEdit: (task: ITask) => void;
+  onDelete: (id: string) => void;
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, onEdit, onDelete }) => {
-  const dispatch = useDispatch();
+  const toggleTaskMutation = useToggleTaskCompletion();
+  const updateLabelMutation = useUpdateTaskLabel();
+
+  const handleToggle = async (taskId: string, currentCompleted: boolean) => {
+    try {
+      await toggleTaskMutation.mutateAsync({
+        id: taskId,
+        completed: !currentCompleted,
+      });
+    } catch (error) {
+      console.error('Error toggling task:', error);
+    }
+  };
+
+  const handleSetPriority = async (taskId: string, priority: TaskLabel) => {
+    try {
+      await updateLabelMutation.mutateAsync({
+        id: taskId,
+        label: priority,
+      });
+    } catch (error) {
+      console.error('Error updating task priority:', error);
+    }
+  };
 
   if (tasks.length === 0) {
     return (
@@ -30,21 +52,14 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onEdit, onDelete }) => {
 
   return (
     <div className="space-y-4 w-full">
-      {tasks.map((todo) => (
+      {tasks.map((task) => (
         <TaskCard
-          key={todo.id}
-          todo={todo}
-          onToggle={() => dispatch(toggleTodo(todo.id))}
-          onSetPriority={(priority) =>
-            dispatch(
-              setPriority({
-                id: todo.id,
-                priority: priority as PriorityLevel,
-              })
-            )
-          }
-          onEdit={() => onEdit(todo)}
-          onDelete={() => onDelete(todo.id)}
+                key={task._id}
+          task={task}
+          onToggle={() => handleToggle(task._id, task.completed)}
+          onSetPriority={(priority) => handleSetPriority(task._id, priority as TaskLabel)}
+          onEdit={() => onEdit(task)}
+          onDelete={() => onDelete(task._id)}
         />
       ))}
     </div>

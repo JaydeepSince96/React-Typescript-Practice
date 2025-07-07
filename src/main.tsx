@@ -5,13 +5,31 @@ import App from "./App.tsx";
 import { store } from "./store.ts";
 import { Provider } from "react-redux";
 import { SidebarProvider } from "./components/ui/sidebar.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import GlobalErrorBoundary from "./components/GlobalErrorBoundary.tsx";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Provider store={store}>
-      <SidebarProvider>
-      <App />
-      </SidebarProvider>
-    </Provider>
+    <GlobalErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <SidebarProvider>
+            <App />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </SidebarProvider>
+        </Provider>
+      </QueryClientProvider>
+    </GlobalErrorBoundary>
   </StrictMode>
 );

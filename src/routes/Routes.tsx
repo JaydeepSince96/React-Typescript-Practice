@@ -1,30 +1,62 @@
-// src/Routes.tsx
 import { createBrowserRouter } from "react-router-dom";
-import Tasks from "@/TodoApp/Tasks";
-import Priority from "@/TodoApp/priority-wise/Priority";
-import ProductivityReports from "@/TodoApp/reports/ProductivityReports";
-import TaskDetails from "@/TodoApp/TaskDetails";
-import TaskReport from "@/TodoApp/reports/TaskReport"; 
+import { lazy } from "react";
+import RouteWrapper from "@/components/RouteWrapper";
+import NotFoundPage from "@/pages/NotFoundPage";
+import ErrorAndLoadingTest from "@/pages/ErrorAndLoadingTest";
 
+// Lazy load components for better performance
+const Tasks = lazy(() => import("@/TodoApp/Tasks"));
+const Priority = lazy(() => import("@/TodoApp/priority-wise/Priority"));
+const ProductivityReports = lazy(() => import("@/TodoApp/reports/ProductivityReports"));
+const TaskDetails = lazy(() => import("@/TodoApp/TaskDetails"));
+const TaskReport = lazy(() => import("@/TodoApp/reports/TaskReport"));
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Tasks />,
+    element: (
+      <RouteWrapper fallbackMessage="Loading tasks...">
+        <Tasks />
+      </RouteWrapper>
+    ),
   },
   {
     path: "/priority",
-    element: <Priority />,
+    element: (
+      <RouteWrapper fallbackMessage="Loading priority tasks...">
+        <Priority />
+      </RouteWrapper>
+    ),
   },
   {
     path: "/chart",
-    element: <ProductivityReports />,
+    element: (
+      <RouteWrapper fallbackMessage="Loading charts...">
+        <ProductivityReports />
+      </RouteWrapper>
+    ),
   },
   {
     path: "/tasks",
-    element: <TaskReport />,
+    element: (
+      <RouteWrapper fallbackMessage="Loading task reports...">
+        <TaskReport />
+      </RouteWrapper>
+    ),
   },
   {
     path: "/task/:id",
-    element: <TaskDetails />,
+    element: (
+      <RouteWrapper fallbackMessage="Loading task details...">
+        <TaskDetails />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/test",
+    element: <ErrorAndLoadingTest />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);

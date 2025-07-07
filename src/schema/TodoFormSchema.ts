@@ -1,10 +1,12 @@
 import * as z from "zod";
+import { TaskLabel } from "@/api/types";
 
 export const formSchema = z
   .object({
     task: z.string().min(1, "Task is required"),
     startDate: z.date().nullable(),
     endDate: z.date().nullable(),
+    priority: z.nativeEnum(TaskLabel),
   })
   .refine((data) => data.startDate, {
     message: "Start date is required.",

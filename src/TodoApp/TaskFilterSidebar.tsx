@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SingleDatePicker from "./common/SingleDatePicker";
 import { IoFilter, IoRefresh, IoCheckmarkCircle } from "react-icons/io5";
 
 // Define the shape of the filters
@@ -153,16 +152,26 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
           <div>
             <Label className="text-neutral-300">Filter by Creation Date</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <SingleDatePicker
-                selected={localFilters.startDate}
-                onChange={(date) => setLocalFilters(prev => ({...prev, startDate: date}))}
-                placeholderText="From Date"
+              <Input
+                type="date"
+                value={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
+                onChange={(e) => setLocalFilters(prev => ({
+                  ...prev, 
+                  startDate: e.target.value ? new Date(e.target.value) : null
+                }))}
+                placeholder="From Date"
+                className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
               />
-              <SingleDatePicker
-                selected={localFilters.endDate}
-                onChange={(date) => setLocalFilters(prev => ({...prev, endDate: date}))}
-                placeholderText="To Date"
-                minDate={localFilters.startDate || undefined}
+              <Input
+                type="date"
+                value={localFilters.endDate ? new Date(localFilters.endDate).toISOString().split('T')[0] : ''}
+                onChange={(e) => setLocalFilters(prev => ({
+                  ...prev, 
+                  endDate: e.target.value ? new Date(e.target.value) : null
+                }))}
+                placeholder="To Date"
+                min={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
+                className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
               />
             </div>
           </div>

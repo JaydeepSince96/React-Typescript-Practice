@@ -1,9 +1,8 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   Sidebar,
   SidebarProvider,
-  SidebarTrigger,
   SidebarRail,
   SidebarHeader,
   SidebarContent,
@@ -12,7 +11,7 @@ import {
   useSidebar, // Assuming useSidebar provides a way to get collapsed state for the trigger
 } from "@/components/ui/sidebar";
 import { SidebarItems } from "@/const/const";
-import { FaBars, FaArrowRightLong } from "react-icons/fa6"; // Import FaBars for hamburger icon
+import { FaBars } from "react-icons/fa6"; // Import FaBars for hamburger icon
 import { useNavigate } from "react-router-dom";
 import {
   MdOutlineDashboard,
@@ -27,6 +26,8 @@ const getSidebarIcon = (label: string) => {
       return <MdOutlineReport className="size-5" />;
     case "Tasks Reports": // Assuming this maps to Charts
       return <MdOutlineDashboard className="size-5" />;
+    case "Test Page":
+      return <MdOutlineSettings className="size-5" />;
     case "Settings":
       return <MdOutlineSettings className="size-5" />;
     default:
@@ -37,12 +38,10 @@ const getSidebarIcon = (label: string) => {
 export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sidebar: any = useSidebar(); // Assuming useSidebar provides current state
-  const isCollapsed = sidebar.collapsed ?? sidebar.isCollapsed ?? false;
   const isMobileOpen = sidebar.open ?? false; // Assuming 'open' state for offcanvas on mobile
   const { open, setOpen } = useSidebar();
 
   const navigate = useNavigate();
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
   return (
     <SidebarProvider>
@@ -63,21 +62,18 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
         >
           {" "}
           {/* z-50 to ensure it's above overlay */}
-          <SidebarHeader
-            className={`p-5 text-2xl font-extrabold bg-neutral-800 text-sky-400 overflow-hidden whitespace-nowrap transition-all duration-300 cursor-pointer
-                            ${
-                              isDesktopCollapsed
-                                ? "md:px-2 md:text-xl md:text-center"
-                                : "md:text-left"
-                            }`}
-            onClick={() => {
-              navigate("/"); // This line navigates to the home screen
-              if (open) {
-                setOpen(false);
-              }
-            }}
-          >
-            {isDesktopCollapsed ? "TaskSync" : "TaskSync"}
+          <SidebarHeader className="p-5 text-2xl font-extrabold bg-neutral-800 text-sky-400 overflow-hidden whitespace-nowrap transition-all duration-300">
+            <div
+              className="cursor-pointer md:text-left"
+              onClick={() => {
+                navigate("/"); // This line navigates to the home screen
+                if (open) {
+                  setOpen(false);
+                }
+              }}
+            >
+              TaskSync
+            </div>
           </SidebarHeader>
           <SidebarContent className="bg-neutral-800 flex-grow py-4">
             <div className="flex flex-col gap-2 p-2">
@@ -113,29 +109,19 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               Assuming it's meant for desktop collapse/expand only.
               For an `offcanvas` variant, this might behave differently.
               Let's keep it but ensure it's hidden on small screens. */}
-          <SidebarRail className="hidden md:block border-r border-neutral-700">
-            {" "}
-            {/* Hidden on mobile */}
-            <SidebarTrigger
-              onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
-              className="p-2 rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors shadow-md border border-neutral-600"
-            >
-              <FaArrowRightLong
-                className={`text-sky-400 transition-transform duration-200 ${
-                  isCollapsed ? "rotate-180" : "rotate-0"
-                }`}
-              />
-            </SidebarTrigger>
-          </SidebarRail>
+          <SidebarRail className="hidden md:block border-r border-neutral-700" />
         </Sidebar>
         <SidebarInset className="flex-1 flex flex-col">
           {" "}
           {/* flex-1 to make main content take remaining space */}
           {/* Mobile Sidebar Trigger (Hamburger Menu) */}
           <div className="p-4 md:hidden flex items-center justify-between bg-neutral-800 border-b border-neutral-700">
-            <SidebarTrigger className="flex items-center gap-2 text-sky-400 bg-neutral-700 rounded-md p-2 shadow-sm hover:bg-neutral-600 transition-colors">
+            <div 
+              onClick={() => sidebar.setOpen ? sidebar.setOpen(!sidebar.open) : setOpen(!open)}
+              className="flex items-center gap-2 text-sky-400 bg-neutral-700 rounded-md p-2 shadow-sm hover:bg-neutral-600 transition-colors cursor-pointer"
+            >
               <FaBars className="text-xl" /> {/* Hamburger icon */}
-            </SidebarTrigger>
+            </div>
             <span
               className="text-xl font-bold text-sky-400 cursor-pointer"
               onClick={() => {

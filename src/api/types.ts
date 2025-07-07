@@ -22,6 +22,17 @@ export interface ITask {
   updatedAt: string; // Formatted date string from backend
 }
 
+export interface ISubtask {
+  _id: string;
+  title: string;
+  completed: boolean;
+  taskId: string; // Reference to main task
+  startDate?: string; // Formatted date string from backend
+  endDate?: string; // Formatted date string from backend
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ILabelOption {
   value: TaskLabel;
   label: string;
@@ -38,6 +49,26 @@ export interface IUpdateTaskPayload {
   completed?: boolean;
   label?: TaskLabel;
   dueDate?: string; // dd/mm/yyyy format
+}
+
+export interface ICreateSubtaskPayload {
+  title: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface IUpdateSubtaskPayload {
+  title?: string;
+  completed?: boolean;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface ISubtaskStats {
+  total: number;
+  completed: number;
+  pending: number;
+  completionRate: number;
 }
 
 export interface ITaskStats {

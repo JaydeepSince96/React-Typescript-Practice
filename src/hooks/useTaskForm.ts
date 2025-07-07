@@ -27,7 +27,7 @@ export function useTaskForm(options: UseTaskFormOptions = {}) {
     task: editTask?.title || "",
     startDate: editTask?.startDate ? new Date(editTask.startDate) : null,
     endDate: editTask?.dueDate ? new Date(editTask.dueDate) : null,
-    priority: editTask?.label || TaskLabel.PRIORITY,
+    priority: editTask?.label || TaskLabel.LOW_PRIORITY,
   }), [editTask]);
 
   const form = useForm<FormData>({

@@ -41,7 +41,6 @@ const Priority = memo(() => {
       "High Priority": TaskLabel.HIGH_PRIORITY,
       "Medium Priority": TaskLabel.MEDIUM_PRIORITY,
       "Low Priority": TaskLabel.LOW_PRIORITY,
-      "Priority": TaskLabel.PRIORITY,
     };
     
     const targetPriority = priorityMap[level];

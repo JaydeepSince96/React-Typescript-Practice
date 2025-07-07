@@ -135,13 +135,11 @@ const ProductivityReports: React.FC = () => {
             "rgba(239, 68, 68, 0.8)",  // High - Red
             "rgba(251, 191, 36, 0.8)", // Medium - Yellow
             "rgba(59, 130, 246, 0.8)", // Low - Blue
-            "rgba(156, 163, 175, 0.8)" // Priority - Gray
           ],
           borderColor: [
             "rgb(239, 68, 68)",
             "rgb(251, 191, 36)",
             "rgb(59, 130, 246)",
-            "rgb(156, 163, 175)"
           ],
           borderWidth: 2,
           borderRadius: 8,
@@ -150,7 +148,6 @@ const ProductivityReports: React.FC = () => {
           label: "Completed Tasks",
           data: labelStats.map(stat => stat.completed),
           backgroundColor: [
-            "rgba(34, 197, 94, 0.8)",
             "rgba(34, 197, 94, 0.8)",
             "rgba(34, 197, 94, 0.8)",
             "rgba(34, 197, 94, 0.8)"

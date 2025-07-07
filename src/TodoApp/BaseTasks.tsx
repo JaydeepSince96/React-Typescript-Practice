@@ -82,7 +82,6 @@ const BaseTasksComponent = memo<BaseTasksConfig>(({
           'High Priority': TaskLabel.HIGH_PRIORITY,
           'Medium Priority': TaskLabel.MEDIUM_PRIORITY,
           'Low Priority': TaskLabel.LOW_PRIORITY,
-          Priority: TaskLabel.PRIORITY,
         };
         if (task.label !== priorityMap[priority]) return false;
       }

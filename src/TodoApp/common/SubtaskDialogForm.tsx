@@ -17,15 +17,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useSubtaskForm } from "@/hooks/useSubtaskForm";
+import type { ISubtask } from "@/api/types";
 
 type SubtaskDialogFormProps = {
   taskId: string;
+  subtask?: ISubtask; // Optional subtask for editing
   onSuccess?: () => void;
   onCancel?: () => void;
 };
 
 const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
   taskId,
+  subtask,
   onSuccess,
   onCancel,
 }) => {
@@ -38,6 +41,7 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
     title,
   } = useSubtaskForm({
     taskId,
+    subtask,
     onSuccess,
     onError: (error) => {
       console.error('Subtask form submission error:', error);

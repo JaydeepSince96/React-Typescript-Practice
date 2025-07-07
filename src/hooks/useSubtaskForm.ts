@@ -1,7 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useCreateSubtask } from "./useSubtaskHooks";
+import { useEffect } from "react";
+import { useCreateSubtask, useUpdateSubtask } from "./useSubtaskHooks";
+import type { ISubtask } from "@/api/types";
 
 const subtaskFormSchema = z.object({
   task: z.string().min(1, "Subtask description is required"),
@@ -21,12 +23,16 @@ export type SubtaskFormData = z.infer<typeof subtaskFormSchema>;
 
 interface UseSubtaskFormProps {
   taskId: string;
+  subtask?: ISubtask; // Optional subtask for editing
   onSuccess?: () => void;
   onError?: (error: unknown) => void;
 }
 
-export const useSubtaskForm = ({ taskId, onSuccess, onError }: UseSubtaskFormProps) => {
+export const useSubtaskForm = ({ taskId, subtask, onSuccess, onError }: UseSubtaskFormProps) => {
   const createSubtaskMutation = useCreateSubtask();
+  const updateSubtaskMutation = useUpdateSubtask();
+  
+  const isEditing = !!subtask;
 
   const form = useForm<SubtaskFormData>({
     resolver: zodResolver(subtaskFormSchema),
@@ -37,16 +43,44 @@ export const useSubtaskForm = ({ taskId, onSuccess, onError }: UseSubtaskFormPro
     },
   });
 
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (subtask) {
+      form.reset({
+        task: subtask.title,
+        startDate: subtask.startDate ? new Date(subtask.startDate) : undefined,
+        endDate: subtask.endDate ? new Date(subtask.endDate) : undefined,
+      });
+    } else {
+      form.reset({
+        task: "",
+        startDate: undefined,
+        endDate: undefined,
+      });
+    }
+  }, [subtask, form]);
+
   const onSubmit = form.handleSubmit(async (data) => {
     try {
-      await createSubtaskMutation.mutateAsync({
-        taskId,
-        payload: {
-          title: data.task,
-          startDate: data.startDate,
-          endDate: data.endDate,
-        }
-      });
+      if (isEditing) {
+        await updateSubtaskMutation.mutateAsync({
+          subtaskId: subtask._id,
+          payload: {
+            title: data.task,
+            startDate: data.startDate,
+            endDate: data.endDate,
+          }
+        });
+      } else {
+        await createSubtaskMutation.mutateAsync({
+          taskId,
+          payload: {
+            title: data.task,
+            startDate: data.startDate,
+            endDate: data.endDate,
+          }
+        });
+      }
       
       resetForm();
       onSuccess?.();
@@ -63,12 +97,14 @@ export const useSubtaskForm = ({ taskId, onSuccess, onError }: UseSubtaskFormPro
     });
   };
 
+  const isLoading = createSubtaskMutation.isPending || updateSubtaskMutation.isPending;
+
   return {
     form,
     onSubmit,
     resetForm,
-    isLoading: createSubtaskMutation.isPending,
-    buttonText: "Add Subtask",
-    title: "Add New Subtask",
+    isLoading,
+    buttonText: isEditing ? "Update Subtask" : "Add Subtask",
+    title: isEditing ? "Edit Subtask" : "Add New Subtask",
   };
 };

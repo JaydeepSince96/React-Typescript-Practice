@@ -10,6 +10,7 @@ import {
   useDeleteSubtask,
   useSubtaskStats
 } from "@/hooks/useSubtaskHooks";
+import type { ISubtask } from "@/api/types";
 import {
   IoArrowBack,
   IoTrashOutline,
@@ -36,9 +37,21 @@ const TaskDetails: React.FC = () => {
   const deleteSubtaskMutation = useDeleteSubtask();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingSubtask, setEditingSubtask] = useState<ISubtask | undefined>(undefined);
 
-  const handleOpenDialog = () => {
+  const handleOpenAddDialog = () => {
+    setEditingSubtask(undefined);
     setDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (subtask: ISubtask) => {
+    setEditingSubtask(subtask);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setEditingSubtask(undefined);
   };
 
   const handleToggleSubtask = async (subtaskId: string) => {
@@ -227,7 +240,7 @@ const TaskDetails: React.FC = () => {
                 )}
               </div>
               <Button 
-                onClick={handleOpenDialog}
+                onClick={handleOpenAddDialog}
                 className="bg-sky-600 hover:bg-sky-700 text-white font-medium"
               >
                 <IoAdd className="mr-2 size-4" />
@@ -256,7 +269,7 @@ const TaskDetails: React.FC = () => {
                   Break down this task into smaller, manageable subtasks to track your progress more effectively.
                 </p>
                 <Button 
-                  onClick={handleOpenDialog}
+                  onClick={handleOpenAddDialog}
                   className="bg-sky-600 hover:bg-sky-700 text-white font-medium px-6"
                 >
                   <IoAdd className="mr-2 size-4" />
@@ -312,7 +325,7 @@ const TaskDetails: React.FC = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={handleOpenDialog}
+                                onClick={() => handleOpenEditDialog(subtask)}
                                 className="text-neutral-400 hover:text-amber-400 hover:bg-amber-400/10 h-8 w-8 transition-all duration-200"
                               >
                                 <IoPencilOutline className="size-4" />
@@ -383,11 +396,12 @@ const TaskDetails: React.FC = () => {
           </div>
         </div>
       </div>
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
         <SubtaskDialogForm
           taskId={id!}
-          onSuccess={() => setDialogOpen(false)}
-          onCancel={() => setDialogOpen(false)}
+          subtask={editingSubtask}
+          onSuccess={handleCloseDialog}
+          onCancel={handleCloseDialog}
         />
       </Dialog>
     </SidebarLayout>

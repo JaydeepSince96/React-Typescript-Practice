@@ -4,7 +4,6 @@ export const priorityLabels = [
   { label: "High Priority", value: TaskLabel.HIGH_PRIORITY },
   { label: "Medium Priority", value: TaskLabel.MEDIUM_PRIORITY },
   { label: "Low Priority", value: TaskLabel.LOW_PRIORITY },
-  { label: "Priority", value: TaskLabel.PRIORITY },
 ] as const;
 
 export const SidebarItems = [

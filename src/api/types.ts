@@ -3,14 +3,12 @@
 export type TaskLabel =
   | "low priority"
   | "medium priority"
-  | "high priority"
-  | "priority";
+  | "high priority";
 
 export const TaskLabel = {
   LOW_PRIORITY: "low priority" as TaskLabel,
   MEDIUM_PRIORITY: "medium priority" as TaskLabel,
-  HIGH_PRIORITY: "high priority" as TaskLabel,
-  PRIORITY: "priority" as TaskLabel
+  HIGH_PRIORITY: "high priority" as TaskLabel
 };
 
 export interface ITask {
@@ -48,12 +46,14 @@ export interface ITaskStats {
   completed: number;
   pending: number;
   completionRate: number;
+  overdue: number;
 }
 
 export interface IOverallStats {
   totalTasks: number;
   completedTasks: number;
   pendingTasks: number;
+  overdueTasks: number;
   overallCompletionRate: number;
 }
 

@@ -27,7 +27,6 @@ const PRIORITY_BORDER_COLORS: Record<TaskLabel, string> = {
   "high priority": "border-l-4 border-red-500",
   "medium priority": "border-l-4 border-yellow-500",
   "low priority": "border-l-4 border-blue-500",
-  "priority": "border-l-4 border-neutral-700",
 };
 
 type TaskCardProps = {

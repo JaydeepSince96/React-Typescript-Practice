@@ -12,7 +12,7 @@ import { priorityLabels } from "@/const/const";
 import type { ITask, TaskLabel } from "@/api/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 // Utility function to truncate text - memoized
 const truncateText = (text: string, maxLength: number) => {
@@ -58,7 +58,7 @@ const TaskCard = memo<TaskCardProps>(
     // Memoized date displays
     const dateDisplays = useMemo(
       () => ({
-        createdAt: formatDateTimeForDisplay(task.createdAt),
+        createdAt: formatDateForDisplay(task.createdAt),
         startDate: formatDateForDisplay(task.startDate),
         dueDate: formatDateForDisplay(task.dueDate),
       }),
@@ -171,6 +171,13 @@ const TaskCard = memo<TaskCardProps>(
                 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30'
               }`}>
                 {task.label?.replace(' priority', '').toUpperCase() || 'NONE'}
+              </div>
+              {/* SubTask Label */}
+              <div 
+                className="px-2 py-1 text-xs font-medium rounded-md bg-purple-500/20 text-purple-400 border border-purple-500/30 cursor-pointer hover:bg-purple-500/30 hover:text-purple-300 transition-colors duration-200"
+                onClick={handleTaskTextClick}
+              >
+                SUBTASKS
               </div>
             </div>
           </div>

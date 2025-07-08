@@ -25,8 +25,10 @@ import {
 import type { ITask } from "@/api/types";
 import withLoadingAndError from "@/hoc/withLoadingAndError";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function Tasks() {
+  const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
   const [editTask, setEditTask] = useState<ITask | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -134,17 +136,31 @@ function Tasks() {
   const getPriorityButtonClasses = useCallback((priorityValue: string) => {
     const baseClasses =
       "m-1 px-4 py-2 rounded-full font-semibold transition-colors duration-200";
-    const colorMap: { [key: string]: string } = {
-      "High Priority": "bg-red-700/40 text-red-300 hover:bg-red-600/60 border border-red-700",
-      "Medium Priority": "bg-yellow-700/40 text-yellow-300 hover:bg-yellow-600/60 border border-yellow-700",
-      "Low Priority": "bg-blue-500/40 text-blue-300 hover:bg-blue-500/60 border border-blue-500",
-      "Priority": "bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600",
-    };
-    return `${baseClasses} ${
-      colorMap[priorityValue] ||
-      "bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600"
-    }`;
-  }, []);
+    
+    if (isDark) {
+      const colorMap: { [key: string]: string } = {
+        "High Priority": "bg-red-700/40 text-red-300 hover:bg-red-600/60 border border-red-700",
+        "Medium Priority": "bg-yellow-700/40 text-yellow-300 hover:bg-yellow-600/60 border border-yellow-700",
+        "Low Priority": "bg-blue-500/40 text-blue-300 hover:bg-blue-500/60 border border-blue-500",
+        "Priority": "bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600",
+      };
+      return `${baseClasses} ${
+        colorMap[priorityValue] ||
+        "bg-neutral-700 text-neutral-300 hover:bg-neutral-600 border border-neutral-600"
+      }`;
+    } else {
+      const colorMap: { [key: string]: string } = {
+        "High Priority": "bg-red-100 text-red-700 hover:bg-red-200 border border-red-300",
+        "Medium Priority": "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300",
+        "Low Priority": "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300",
+        "Priority": "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300",
+      };
+      return `${baseClasses} ${
+        colorMap[priorityValue] ||
+        "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+      }`;
+    }
+  }, [isDark]);
 
   const handleEdit = useCallback((task: ITask) => {
     setEditTask(task);
@@ -203,8 +219,12 @@ function Tasks() {
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="p-6 text-center text-white">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-sky-400 border-t-transparent mx-auto mb-4"></div>
+        <div className={`p-6 text-center transition-colors duration-300 ${
+          isDark ? 'text-white' : 'text-gray-800'
+        }`}>
+          <div className={`animate-spin rounded-full h-12 w-12 border-4 border-t-transparent mx-auto mb-4 ${
+            isDark ? 'border-sky-400' : 'border-blue-500'
+          }`}></div>
           Loading tasks...
         </div>
       </SidebarLayout>
@@ -214,8 +234,12 @@ function Tasks() {
   if (error) {
     return (
       <SidebarLayout>
-        <div className="p-6 text-center text-white">
-          <p className="text-red-400 mb-4">Failed to load tasks</p>
+        <div className={`p-6 text-center transition-colors duration-300 ${
+          isDark ? 'text-white' : 'text-gray-800'
+        }`}>
+          <p className={`mb-4 ${
+            isDark ? 'text-red-400' : 'text-red-600'
+          }`}>Failed to load tasks</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Retry
           </Button>
@@ -226,7 +250,9 @@ function Tasks() {
 
   return (
     <SidebarLayout>
-      <div className="p-6 bg-neutral-900 min-h-screen flex flex-col">
+      <div className={`p-6 min-h-screen flex flex-col transition-colors duration-300 ${
+        isDark ? 'bg-neutral-900' : 'bg-gray-50'
+      }`}>
         <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div className="flex flex-wrap">
             {priorityLabels.map((item) => (
@@ -249,9 +275,15 @@ function Tasks() {
 
         {/* Filter status indicator */}
         {hasActiveFilters && (
-          <div className="mb-4 p-3 bg-sky-600/10 border border-sky-600/30 rounded-lg">
+          <div className={`mb-4 p-3 rounded-lg border ${
+            isDark 
+              ? 'bg-sky-600/10 border-sky-600/30' 
+              : 'bg-blue-50 border-blue-200'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-sky-400 text-sm font-medium">
+              <span className={`text-sm font-medium ${
+                isDark ? 'text-sky-400' : 'text-blue-700'
+              }`}>
                 Showing {totalCount} filtered result{totalCount !== 1 ? 's' : ''}
               </span>
               <Button
@@ -264,7 +296,11 @@ function Tasks() {
                   startDate: null,
                   endDate: null,
                 })}
-                className="text-sky-400 hover:text-sky-300"
+                className={
+                  isDark 
+                    ? "text-sky-400 hover:text-sky-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }
               >
                 Clear Filters
               </Button>

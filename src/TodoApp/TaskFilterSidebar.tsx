@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IoFilter, IoRefresh, IoCheckmarkCircle } from "react-icons/io5";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 // Define the shape of the filters
 interface TaskFilters {
@@ -42,6 +44,7 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
   setIsFilterOpen,
 }) => {
   const [localFilters, setLocalFilters] = useState<TaskFilters>(initialFilters);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (isFilterOpen) {
@@ -72,21 +75,36 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white"
+          className={cn(
+            "border transition-colors duration-200",
+            isDark 
+              ? "bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white" 
+              : "bg-white border-gray-200 hover:bg-gray-50 text-gray-800"
+          )}
         >
           <IoFilter className="mr-2 size-4" />
           Filter Tasks
         </Button>
       </SheetTrigger>
-      <SheetContent className="bg-neutral-800 border-l border-neutral-700 text-white w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className={cn(
+        "w-full sm:max-w-md overflow-y-auto",
+        isDark 
+          ? "bg-neutral-800 border-l border-neutral-700 text-white" 
+          : "bg-white border-l border-gray-200 text-gray-900"
+      )}>
         <SheetHeader className="p-6">
-          <SheetTitle className="text-sky-400 text-2xl">
+          <SheetTitle className={cn(
+            "text-2xl",
+            isDark ? "text-sky-400" : "text-blue-600"
+          )}>
             Filter Tasks
           </SheetTitle>
         </SheetHeader>
         <div className="p-6 space-y-6">
           <div>
-            <Label htmlFor="searchId" className="text-neutral-300">
+            <Label htmlFor="searchId" className={cn(
+              isDark ? "text-neutral-300" : "text-gray-700"
+            )}>
               Search by Task ID
             </Label>
             <Input
@@ -96,12 +114,19 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               onChange={(e) =>
                 setLocalFilters((prev) => ({ ...prev, searchId: e.target.value }))
               }
-              className="bg-neutral-700 border-neutral-600 mt-2"
+              className={cn(
+                "mt-2",
+                isDark 
+                  ? "bg-neutral-700 border-neutral-600" 
+                  : "bg-white border-gray-200"
+              )}
             />
           </div>
 
           <div>
-            <Label htmlFor="priority" className="text-neutral-300">
+            <Label htmlFor="priority" className={cn(
+              isDark ? "text-neutral-300" : "text-gray-700"
+            )}>
               Priority
             </Label>
             <Select
@@ -112,11 +137,20 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             >
               <SelectTrigger
                 id="priority"
-                className="w-full mt-2 bg-neutral-700 border-neutral-600"
+                className={cn(
+                  "w-full mt-2",
+                  isDark 
+                    ? "bg-neutral-700 border-neutral-600" 
+                    : "bg-white border-gray-200"
+                )}
               >
                 <SelectValue placeholder="Select Priority" />
               </SelectTrigger>
-              <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
+              <SelectContent className={cn(
+                isDark 
+                  ? "bg-neutral-800 border-neutral-700 text-white" 
+                  : "bg-white border-gray-200 text-gray-900"
+              )}>
                 <SelectItem value="All">All Priorities</SelectItem>
                 <SelectItem value="High Priority">High Priority</SelectItem>
                 <SelectItem value="Medium Priority">Medium Priority</SelectItem>
@@ -126,7 +160,9 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="status" className="text-neutral-300">
+            <Label htmlFor="status" className={cn(
+              isDark ? "text-neutral-300" : "text-gray-700"
+            )}>
               Status
             </Label>
             <Select
@@ -137,11 +173,20 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             >
               <SelectTrigger
                 id="status"
-                className="w-full mt-2 bg-neutral-700 border-neutral-600"
+                className={cn(
+                  "w-full mt-2",
+                  isDark 
+                    ? "bg-neutral-700 border-neutral-600" 
+                    : "bg-white border-gray-200"
+                )}
               >
                 <SelectValue placeholder="Select Status" />
               </SelectTrigger>
-              <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
+              <SelectContent className={cn(
+                isDark 
+                  ? "bg-neutral-800 border-neutral-700 text-white" 
+                  : "bg-white border-gray-200 text-gray-900"
+              )}>
                 <SelectItem value="All">All Statuses</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
@@ -150,7 +195,7 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
           </div>
 
           <div>
-            <Label className="text-neutral-300">Filter by Creation Date</Label>
+            <Label className={cn(isDark ? "text-neutral-300" : "text-gray-700")}>Filter by Creation Date</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               <Input
                 type="date"
@@ -160,7 +205,11 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
                   startDate: e.target.value ? new Date(e.target.value) : null
                 }))}
                 placeholder="From Date"
-                className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                className={cn(
+                  isDark 
+                    ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                    : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
+                )}
               />
               <Input
                 type="date"
@@ -171,15 +220,27 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
                 }))}
                 placeholder="To Date"
                 min={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
-                className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                className={cn(
+                  isDark 
+                    ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                    : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
+                )}
               />
             </div>
           </div>
         </div>
-        <SheetFooter className="flex flex-col gap-3 p-6 pt-4 border-t border-neutral-700">
+        <SheetFooter className={cn(
+          "flex flex-col gap-3 p-6 pt-4 border-t",
+          isDark ? "border-neutral-700" : "border-gray-200"
+        )}>
           <Button
             onClick={handleApply}
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3"
+            className={cn(
+              "w-full font-semibold py-3 transition-colors duration-200",
+              isDark
+                ? "bg-sky-600 hover:bg-sky-700 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md"
+            )}
           >
             <IoCheckmarkCircle className="mr-2 size-5" />
             Apply Filters
@@ -187,7 +248,12 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
           <Button
             variant="outline"
             onClick={handleClear}
-            className="w-full bg-neutral-700 hover:bg-neutral-600 border-neutral-600 py-3"
+            className={cn(
+              "w-full py-3 transition-colors duration-200",
+              isDark
+                ? "bg-neutral-700 hover:bg-neutral-600 border-neutral-600 text-white"
+                : "bg-white hover:bg-gray-50 border-gray-200 text-gray-800"
+            )}
           >
             <IoRefresh className="mr-2 size-5" />
             Clear Filters

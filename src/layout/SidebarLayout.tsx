@@ -18,6 +18,8 @@ import {
   MdOutlineReport,
   MdOutlineSettings,
 } from "react-icons/md";
+import { useTheme } from "@/contexts/ThemeContext";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 // Helper to get icons for sidebar items
 const getSidebarIcon = (label: string) => {
@@ -40,12 +42,15 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   const sidebar: any = useSidebar(); // Assuming useSidebar provides current state
   const isMobileOpen = sidebar.open ?? false; // Assuming 'open' state for offcanvas on mobile
   const { open, setOpen } = useSidebar();
+  const { isDark } = useTheme();
 
   const navigate = useNavigate();
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen min-w-screen bg-neutral-900 text-white overflow-hidden relative">
+      <div className={`flex min-h-screen min-w-screen text-white overflow-hidden relative transition-colors duration-300 ${
+        isDark ? 'bg-neutral-900' : 'bg-gray-50'
+      }`}>
         {" "}
         {/* Added relative for overlay positioning */}
         {/* Mobile Overlay */}
@@ -58,24 +63,39 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
         <Sidebar
           variant="sidebar"
           collapsible="offcanvas"
-          className="bg-neutral-800 border-r border-neutral-700 shadow-xl z-50"
+          className={`border-r shadow-xl z-50 transition-colors duration-300 ${
+            isDark 
+              ? 'bg-neutral-800 border-neutral-700' 
+              : 'bg-white border-gray-200'
+          }`}
         >
           {" "}
           {/* z-50 to ensure it's above overlay */}
-          <SidebarHeader className="p-5 text-2xl font-extrabold bg-neutral-800 text-sky-400 overflow-hidden whitespace-nowrap transition-all duration-300">
-            <div
-              className="cursor-pointer md:text-left"
-              onClick={() => {
-                navigate("/"); // This line navigates to the home screen
-                if (open) {
-                  setOpen(false);
-                }
-              }}
-            >
-              TaskSync
+          <SidebarHeader className={`p-5 text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
+            isDark 
+              ? 'bg-neutral-800 text-sky-400' 
+              : 'bg-white text-blue-600'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div
+                className="cursor-pointer md:text-left"
+                onClick={() => {
+                  navigate("/"); // This line navigates to the home screen
+                  if (open) {
+                    setOpen(false);
+                  }
+                }}
+              >
+                TaskSync
+              </div>
+              <div className="ml-4">
+                <ThemeToggle />
+              </div>
             </div>
           </SidebarHeader>
-          <SidebarContent className="bg-neutral-800 flex-grow py-4">
+          <SidebarContent className={`flex-grow py-4 transition-colors duration-300 ${
+            isDark ? 'bg-neutral-800' : 'bg-white'
+          }`}>
             <div className="flex flex-col gap-2 p-2">
               {SidebarItems.map((item) => (
                 <div
@@ -83,8 +103,12 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200
                   ${
                     window.location.pathname === item.path
-                      ? "bg-neutral-700 text-sky-400 font-semibold" // Active state
-                      : "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400" // Hover state
+                      ? isDark
+                        ? "bg-neutral-700 text-sky-400 font-semibold" // Active state dark
+                        : "bg-blue-50 text-blue-600 font-semibold" // Active state light
+                      : isDark
+                        ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400" // Hover state dark
+                        : "text-gray-600 hover:bg-gray-100 hover:text-blue-600" // Hover state light
                   }`}
                   onClick={() => {
                     navigate(item.path);
@@ -100,7 +124,11 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               ))}
             </div>
           </SidebarContent>
-          <SidebarFooter className="p-4 bg-neutral-800 text-neutral-400 text-sm border-t border-neutral-700">
+          <SidebarFooter className={`p-4 text-sm border-t transition-colors duration-300 ${
+            isDark 
+              ? 'bg-neutral-800 text-neutral-400 border-neutral-700' 
+              : 'bg-white text-gray-500 border-gray-200'
+          }`}>
             Copyright PK @2025
           </SidebarFooter>
           {/* Desktop Sidebar Toggle (hidden on mobile) */}
@@ -109,21 +137,33 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               Assuming it's meant for desktop collapse/expand only.
               For an `offcanvas` variant, this might behave differently.
               Let's keep it but ensure it's hidden on small screens. */}
-          <SidebarRail className="hidden md:block border-r border-neutral-700" />
+          <SidebarRail className={`hidden md:block border-r transition-colors duration-300 ${
+            isDark ? 'border-neutral-700' : 'border-gray-200'
+          }`} />
         </Sidebar>
         <SidebarInset className="flex-1 flex flex-col">
           {" "}
           {/* flex-1 to make main content take remaining space */}
           {/* Mobile Sidebar Trigger (Hamburger Menu) */}
-          <div className="p-4 md:hidden flex items-center justify-between bg-neutral-800 border-b border-neutral-700">
+          <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
+            isDark 
+              ? 'bg-neutral-800 border-neutral-700' 
+              : 'bg-white border-gray-200'
+          }`}>
             <div 
               onClick={() => sidebar.setOpen ? sidebar.setOpen(!sidebar.open) : setOpen(!open)}
-              className="flex items-center gap-2 text-sky-400 bg-neutral-700 rounded-md p-2 shadow-sm hover:bg-neutral-600 transition-colors cursor-pointer"
+              className={`flex items-center gap-2 rounded-md p-2 shadow-sm transition-colors cursor-pointer ${
+                isDark 
+                  ? 'text-sky-400 bg-neutral-700 hover:bg-neutral-600'
+                  : 'text-blue-600 bg-gray-100 hover:bg-gray-200'
+              }`}
             >
               <FaBars className="text-xl" /> {/* Hamburger icon */}
             </div>
             <span
-              className="text-xl font-bold text-sky-400 cursor-pointer"
+              className={`text-xl font-bold cursor-pointer ${
+                isDark ? 'text-sky-400' : 'text-blue-600'
+              }`}
               onClick={() => {
                 navigate("/"); // This line navigates to the home screen
                 if (open) {
@@ -134,8 +174,13 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               Peak Productivity
             </span>
             {/* Mobile Header Title */}
+            <div>
+              <ThemeToggle />
+            </div>
           </div>
-          <main className="flex-1 h-full overflow-y-auto bg-neutral-900 p-4 md:p-6">
+          <main className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
+            isDark ? 'bg-neutral-900' : 'bg-gray-50'
+          }`}>
             {children}
           </main>
         </SidebarInset>

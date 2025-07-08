@@ -218,6 +218,31 @@ export const taskAPI = {
       throw new Error(handleAPIError(error));
     }
   },
+
+  // Get single task by ID
+  getTaskById: async (id: string): Promise<ITask> => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.TASKS}/${id}`, {
+        method: 'GET',
+        headers: createAPIHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: IAPIResponse<ITask> = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch task');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching task:', error);
+      throw new Error(handleAPIError(error));
+    }
+  },
 };
 
 // Export individual functions for easier importing
@@ -231,4 +256,5 @@ export const {
   updateTaskLabel,
   updateTaskDueDate,
   getFilteredTasks,
+  getTaskById,
 } = taskAPI;

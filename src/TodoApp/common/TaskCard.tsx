@@ -1,8 +1,6 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState, useEffect } from "react";
 import {
   Select,
-  // SelectTrigger,
-  // SelectValue,
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
@@ -14,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { getSubtaskStats } from "@/api/subtask/subtask-api";
+import type { ISubtaskStats } from "@/api/types";
 
 
 // Utility function to truncate text - memoized
@@ -45,6 +45,29 @@ const TaskCard = memo<TaskCardProps>(
     const { isDark } = useTheme();
     const [showCopyTooltip, setShowCopyTooltip] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [subtaskStats, setSubtaskStats] = useState<ISubtaskStats | null>(null);
+    const [showSubtaskTooltip, setShowSubtaskTooltip] = useState(false);
+
+    // Fetch subtask stats when component mounts or task changes
+    useEffect(() => {
+      const fetchSubtaskStats = async () => {
+        try {
+          const stats = await getSubtaskStats(task._id);
+          setSubtaskStats(stats);
+        } catch (error) {
+          console.error('Failed to fetch subtask stats:', error);
+          // Set default empty stats if API fails
+          setSubtaskStats({
+            total: 0,
+            completed: 0,
+            pending: 0,
+            completionRate: 0,
+          });
+        }
+      };
+
+      fetchSubtaskStats();
+    }, [task._id]);
 
     // Memoized priority border color
     const priorityBorderColor = useMemo(() => {
@@ -262,16 +285,66 @@ const TaskCard = memo<TaskCardProps>(
               }`}>
                 {task.label?.replace(' priority', '').toUpperCase() || 'NONE'}
               </div>
-              {/* SubTask Label */}
+              {/* Enhanced SubTask Label with Analytics */}
               <div 
-                className={`px-3 py-1 text-xs font-medium rounded-lg cursor-pointer transition-colors duration-200 border ${
+                className={`relative px-3 py-1 text-xs font-medium rounded-lg cursor-pointer transition-colors duration-200 border ${
                   isDark 
                     ? 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30 hover:text-purple-300'
                     : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 hover:text-purple-800 shadow-sm hover:shadow-md'
                 }`}
                 onClick={handleTaskTextClick}
+                onMouseEnter={() => setShowSubtaskTooltip(true)}
+                onMouseLeave={() => setShowSubtaskTooltip(false)}
               >
-                SUBTASKS
+                <div className="flex items-center gap-1">
+                  <span>SUBTASKS</span>
+                  {subtaskStats && subtaskStats.total > 0 && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                      isDark 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-purple-600 text-white'
+                    }`}>
+                      {subtaskStats.completed}/{subtaskStats.total}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Subtask Stats Tooltip */}
+                {showSubtaskTooltip && subtaskStats && subtaskStats.total > 0 && (
+                  <div className={`
+                    absolute bottom-full left-0 mb-2 p-3 rounded-lg border shadow-lg z-50 min-w-48
+                    ${isDark 
+                      ? 'bg-neutral-800 border-neutral-600 text-white'
+                      : 'bg-white border-gray-200 text-gray-900 shadow-xl'
+                    }
+                  `}>
+                    <div className="text-xs font-semibold mb-2">Subtask Progress</div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-xs">Completed:</span>
+                        <span className="text-xs font-medium">{subtaskStats.completed}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs">Pending:</span>
+                        <span className="text-xs font-medium">{subtaskStats.pending}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs">Progress:</span>
+                        <span className="text-xs font-bold">{subtaskStats.completionRate.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <div className={`w-full bg-gray-200 rounded-full h-1.5 ${
+                        isDark ? 'bg-neutral-600' : 'bg-gray-200'
+                      }`}>
+                        <div 
+                          className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${subtaskStats.completionRate}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

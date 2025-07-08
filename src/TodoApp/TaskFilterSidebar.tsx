@@ -107,6 +107,12 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             )}>
               Search by Task ID
             </Label>
+            <p className={cn(
+              "text-xs mt-1 mb-2",
+              isDark ? "text-neutral-400" : "text-gray-500"
+            )}>
+              Enter full or partial Task ID (e.g., "686cf2" or full ID)
+            </p>
             <Input
               id="searchId"
               placeholder="Enter Task ID..."
@@ -115,7 +121,6 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
                 setLocalFilters((prev) => ({ ...prev, searchId: e.target.value }))
               }
               className={cn(
-                "mt-2",
                 isDark 
                   ? "bg-neutral-700 border-neutral-600" 
                   : "bg-white border-gray-200"
@@ -195,37 +200,63 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
           </div>
 
           <div>
-            <Label className={cn(isDark ? "text-neutral-300" : "text-gray-700")}>Filter by Creation Date</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <Input
-                type="date"
-                value={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
-                onChange={(e) => setLocalFilters(prev => ({
-                  ...prev, 
-                  startDate: e.target.value ? new Date(e.target.value) : null
-                }))}
-                placeholder="From Date"
-                className={cn(
-                  isDark 
-                    ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
-                    : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
-                )}
-              />
-              <Input
-                type="date"
-                value={localFilters.endDate ? new Date(localFilters.endDate).toISOString().split('T')[0] : ''}
-                onChange={(e) => setLocalFilters(prev => ({
-                  ...prev, 
-                  endDate: e.target.value ? new Date(e.target.value) : null
-                }))}
-                placeholder="To Date"
-                min={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
-                className={cn(
-                  isDark 
-                    ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
-                    : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
-                )}
-              />
+            <Label className={cn(isDark ? "text-neutral-300" : "text-gray-700")}>
+              Filter by Task Date Range
+            </Label>
+            <p className={cn(
+              "text-xs mt-1 mb-3",
+              isDark ? "text-neutral-400" : "text-gray-500"
+            )}>
+              Find tasks that overlap with this date range (based on task start and due dates)
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className={cn(
+                  "text-xs font-medium",
+                  isDark ? "text-neutral-400" : "text-gray-600"
+                )}>
+                  From Date
+                </Label>
+                <Input
+                  type="date"
+                  value={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setLocalFilters(prev => ({
+                    ...prev, 
+                    startDate: e.target.value ? new Date(e.target.value) : null
+                  }))}
+                  placeholder="From Date"
+                  className={cn(
+                    "mt-1",
+                    isDark 
+                      ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                      : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
+                  )}
+                />
+              </div>
+              <div>
+                <Label className={cn(
+                  "text-xs font-medium",
+                  isDark ? "text-neutral-400" : "text-gray-600"
+                )}>
+                  To Date
+                </Label>
+                <Input
+                  type="date"
+                  value={localFilters.endDate ? new Date(localFilters.endDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setLocalFilters(prev => ({
+                    ...prev, 
+                    endDate: e.target.value ? new Date(e.target.value) : null
+                  }))}
+                  placeholder="To Date"
+                  min={localFilters.startDate ? new Date(localFilters.startDate).toISOString().split('T')[0] : ''}
+                  className={cn(
+                    "mt-1",
+                    isDark 
+                      ? "bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                      : "bg-white border-gray-200 text-gray-900 focus:border-blue-400"
+                  )}
+                />
+              </div>
             </div>
           </div>
         </div>

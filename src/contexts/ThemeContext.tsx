@@ -1,75 +1,54 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React,
+{
+  createContext,
+  useState,
+  useMemo,
+  useEffect,
+  useContext
+} from 'react';
 
-type Theme = 'light' | 'dark';
-
+// Define the shape of the context data
 interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
   isDark: boolean;
-  isLight: boolean;
+  toggleTheme: () => void;
 }
 
+// Create the context with a default value
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
+// Create a provider component
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDark, setIsDark] = useState(false);
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
-
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check localStorage first, then system preference
-    const savedTheme = localStorage.getItem('app-theme') as Theme;
-    if (savedTheme) {
-      return savedTheme;
-    }
-    
-    // Check system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    
-    return 'light';
-  });
-
+  // Toggle the theme
   const toggleTheme = () => {
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('app-theme', newTheme);
-      return newTheme;
-    });
+    setIsDark(prevIsDark => !prevIsDark);
   };
 
+  // Add/remove 'dark' class from the body
   useEffect(() => {
-    const root = window.document.documentElement;
-    
-    // Remove previous theme classes
-    root.classList.remove('light', 'dark');
-    
-    // Add current theme class
-    root.classList.add(theme);
-    
-    // Update data attribute for CSS targeting
-    root.setAttribute('data-theme', theme);
-  }, [theme]);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
-  const value = {
-    theme,
-    toggleTheme,
-    isDark: theme === 'dark',
-    isLight: theme === 'light',
-  };
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({ isDark, toggleTheme }), [isDark]);
 
   return (
     <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
+};
+
+// Custom hook to use the theme context
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
 };

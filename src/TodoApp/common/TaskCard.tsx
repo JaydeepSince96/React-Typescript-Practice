@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
+  // SelectTrigger,
+  // SelectValue,
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
@@ -14,9 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Badge } from "@/components/ui/badge";
-import { Copy, Check, ArrowRight } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 // Utility function to truncate text - memoized
 const truncateText = (text: string, maxLength: number) => {

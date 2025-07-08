@@ -30,6 +30,8 @@ import {
 import { SidebarLayout } from "@/layout/SidebarLayout";
 import { TbListSearch } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 // Register Chart.js components
 ChartJS.register(
@@ -53,6 +55,7 @@ const StatCard = ({
   isPercentage = false,
   trend,
   trendValue,
+  isDark,
 }: {
   title: string;
   value: number;
@@ -61,23 +64,41 @@ const StatCard = ({
   isPercentage?: boolean;
   trend?: "up" | "down" | "neutral";
   trendValue?: number;
+  isDark: boolean;
 }) => (
   <div
-    className={`bg-gradient-to-br from-neutral-800 to-neutral-900 p-6 rounded-xl shadow-xl border border-neutral-700 hover:border-neutral-600 transition-all duration-300 ${className}`}
+    className={cn(
+      "p-6 rounded-xl shadow-xl border hover:border-opacity-80 transition-all duration-300",
+      isDark 
+        ? "bg-gradient-to-br from-neutral-800 to-neutral-900 border-neutral-700 hover:border-neutral-600" 
+        : "bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg",
+      className
+    )}
   >
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <div className="text-4xl p-3 rounded-lg bg-neutral-700/50">{icon}</div>
+        <div className={cn(
+          "text-4xl p-3 rounded-lg",
+          isDark ? "bg-neutral-700/50" : "bg-gray-100"
+        )}>
+          {icon}
+        </div>
         <div>
-          <p className="text-sm text-neutral-400 font-medium uppercase tracking-wide">
+          <p className={cn(
+            "text-sm font-medium uppercase tracking-wide",
+            isDark ? "text-neutral-400" : "text-gray-600"
+          )}>
             {title}
           </p>
-          <p className="text-3xl font-bold text-white mt-1">
+          <p className={cn(
+            "text-3xl font-bold mt-1",
+            isDark ? "text-white" : "text-gray-900"
+          )}>
             {value}{isPercentage ? "%" : ""}
           </p>
           {trend && trendValue !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-sm ${
-              trend === "up" ? "text-green-400" : trend === "down" ? "text-red-400" : "text-neutral-400"
+              trend === "up" ? "text-green-400" : trend === "down" ? "text-red-400" : isDark ? "text-neutral-400" : "text-gray-500"
             }`}>
               {trend === "up" ? <IoTrendingUpOutline /> : trend === "down" ? <IoArrowDownCircleOutline /> : null}
               <span>{trendValue}% from last week</span>
@@ -91,6 +112,7 @@ const StatCard = ({
 
 const ProductivityReports: React.FC = () => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const [statsData, setStatsData] = useState<IStatsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +234,7 @@ const ProductivityReports: React.FC = () => {
       legend: {
         position: "top" as const,
         labels: {
-          color: "#cbd5e1",
+          color: isDark ? "#cbd5e1" : "#374151",
           font: {
             size: 12,
             weight: "bold" as const,
@@ -221,10 +243,10 @@ const ProductivityReports: React.FC = () => {
         },
       },
       tooltip: {
-        backgroundColor: "#1f2937",
-        titleColor: "#f9fafb",
-        bodyColor: "#e5e7eb",
-        borderColor: "#4b5563",
+        backgroundColor: isDark ? "#1f2937" : "#ffffff",
+        titleColor: isDark ? "#f9fafb" : "#111827",
+        bodyColor: isDark ? "#e5e7eb" : "#374151",
+        borderColor: isDark ? "#4b5563" : "#d1d5db",
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12,
@@ -233,28 +255,28 @@ const ProductivityReports: React.FC = () => {
     scales: {
       x: {
         ticks: { 
-          color: "#9ca3af",
+          color: isDark ? "#9ca3af" : "#6b7280",
           font: { size: 11 }
         },
         grid: { 
-          color: "rgba(255,255,255,0.05)",
-          borderColor: "rgba(255,255,255,0.1)"
+          color: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+          borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
         },
         border: {
-          color: "rgba(255,255,255,0.1)"
+          color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
         }
       },
       y: {
         ticks: { 
-          color: "#9ca3af",
+          color: isDark ? "#9ca3af" : "#6b7280",
           font: { size: 11 }
         },
         grid: { 
-          color: "rgba(255,255,255,0.05)",
-          borderColor: "rgba(255,255,255,0.1)"
+          color: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+          borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
         },
         border: {
-          color: "rgba(255,255,255,0.1)"
+          color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
         }
       },
     },
@@ -267,7 +289,7 @@ const ProductivityReports: React.FC = () => {
       legend: {
         position: "bottom" as const,
         labels: {
-          color: "#cbd5e1",
+          color: isDark ? "#cbd5e1" : "#374151",
           font: {
             size: 12,
           },
@@ -276,10 +298,10 @@ const ProductivityReports: React.FC = () => {
         },
       },
       tooltip: {
-        backgroundColor: "#1f2937",
-        titleColor: "#f9fafb",
-        bodyColor: "#e5e7eb",
-        borderColor: "#4b5563",
+        backgroundColor: isDark ? "#1f2937" : "#ffffff",
+        titleColor: isDark ? "#f9fafb" : "#111827",
+        bodyColor: isDark ? "#e5e7eb" : "#374151",
+        borderColor: isDark ? "#4b5563" : "#d1d5db",
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12,
@@ -300,7 +322,10 @@ const ProductivityReports: React.FC = () => {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-neutral-900 text-white p-6">
+      <div className={cn(
+        "min-h-screen p-6 transition-colors duration-300",
+        isDark ? "bg-neutral-900 text-white" : "bg-gray-50 text-gray-900"
+      )}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -308,20 +333,34 @@ const ProductivityReports: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/")}
-              className="hover:bg-neutral-800 text-neutral-400 hover:text-white"
+              className={cn(
+                "transition-colors",
+                isDark 
+                  ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
+                  : "hover:bg-gray-100 text-gray-600 hover:text-gray-800"
+              )}
             >
               <IoArrowBack className="text-xl" />
             </Button>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
+              <h1 className={cn(
+                "text-4xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
+                isDark ? "from-sky-400 to-blue-500" : "from-blue-600 to-indigo-600"
+              )}>
                 Productivity Dashboard
               </h1>
-              <p className="text-neutral-400 mt-2">
+              <p className={cn(
+                "mt-2",
+                isDark ? "text-neutral-400" : "text-gray-600"
+              )}>
                 Comprehensive insights into your task management and productivity metrics
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sky-400">
+          <div className={cn(
+            "flex items-center gap-2",
+            isDark ? "text-sky-400" : "text-blue-600"
+          )}>
             <IoStatsChartOutline className="text-2xl" />
             <span className="text-sm font-medium">Real-time Analytics</span>
           </div>
@@ -331,15 +370,26 @@ const ProductivityReports: React.FC = () => {
         {isLoading && (
           <div className="flex justify-center items-center h-64">
             <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-sky-400 border-t-transparent"></div>
-              <div className="text-sky-400 text-lg font-medium">Loading analytics...</div>
+              <div className={cn(
+                "animate-spin rounded-full h-12 w-12 border-4 border-t-transparent",
+                isDark ? "border-sky-400" : "border-blue-600"
+              )}></div>
+              <div className={cn(
+                "text-lg font-medium",
+                isDark ? "text-sky-400" : "text-blue-600"
+              )}>Loading analytics...</div>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && !isLoading && (
-          <div className="bg-red-900/20 border border-red-700 rounded-xl p-6 text-red-300 mb-8">
+          <div className={cn(
+            "rounded-xl p-6 mb-8 border",
+            isDark 
+              ? "bg-red-900/20 border-red-700 text-red-300" 
+              : "bg-red-50 border-red-200 text-red-800"
+          )}>
             <div className="flex items-center gap-3 mb-3">
               <IoWarningOutline className="text-2xl text-red-400" />
               <h3 className="font-semibold text-lg">Failed to load analytics</h3>
@@ -347,7 +397,12 @@ const ProductivityReports: React.FC = () => {
             <p className="text-sm mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-medium transition-colors"
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                isDark 
+                  ? "bg-red-600 hover:bg-red-700 text-white" 
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              )}
             >
               Retry
             </button>
@@ -365,6 +420,7 @@ const ProductivityReports: React.FC = () => {
                 icon={<IoListCircleOutline className="text-sky-400" />}
                 trend="up"
                 trendValue={12}
+                isDark={isDark}
               />
               <StatCard
                 title="Completed"
@@ -372,6 +428,7 @@ const ProductivityReports: React.FC = () => {
                 icon={<IoCheckmarkDoneCircleOutline className="text-green-400" />}
                 trend="up"
                 trendValue={8}
+                isDark={isDark}
               />
               <StatCard
                 title="Pending"
@@ -379,6 +436,7 @@ const ProductivityReports: React.FC = () => {
                 icon={<IoTimeOutline className="text-yellow-400" />}
                 trend="down"
                 trendValue={5}
+                isDark={isDark}
               />
               <StatCard
                 title="Overdue"
@@ -386,6 +444,7 @@ const ProductivityReports: React.FC = () => {
                 icon={<IoWarningOutline className="text-red-400" />}
                 trend="down"
                 trendValue={15}
+                isDark={isDark}
               />
             </div>
 
@@ -405,7 +464,11 @@ const ProductivityReports: React.FC = () => {
                       <IoArrowDownCircleOutline className="text-blue-400" />
                     )
                   }
-                  className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50"
+                  className={cn(
+                    "bg-gradient-to-br",
+                    isDark ? "from-neutral-800/50 to-neutral-900/50" : "from-gray-100/50 to-gray-200/50"
+                  )}
+                  isDark={isDark}
                 />
               ))}
               <StatCard
@@ -415,15 +478,29 @@ const ProductivityReports: React.FC = () => {
                 isPercentage={true}
                 trend="up"
                 trendValue={3}
-                className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-700/30"
+                className={cn(
+                  "bg-gradient-to-br",
+                  isDark 
+                    ? "from-green-900/20 to-emerald-900/20 border-green-700/30" 
+                    : "from-green-50/50 to-emerald-50/50 border-green-200/50"
+                )}
+                isDark={isDark}
               />
             </div>
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Priority Distribution Chart */}
-              <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 p-6 rounded-xl shadow-xl border border-neutral-700">
-                <h3 className="text-xl font-semibold mb-6 text-sky-400 flex items-center gap-2">
+              <div className={cn(
+                "p-6 rounded-xl shadow-xl border bg-gradient-to-br",
+                isDark 
+                  ? "from-neutral-800 to-neutral-900 border-neutral-700" 
+                  : "from-white to-gray-50 border-gray-200"
+              )}>
+                <h3 className={cn(
+                  "text-xl font-semibold mb-6 flex items-center gap-2",
+                  isDark ? "text-sky-400" : "text-blue-600"
+                )}>
                   <IoStatsChartOutline />
                   Priority Distribution
                 </h3>
@@ -435,8 +512,16 @@ const ProductivityReports: React.FC = () => {
               </div>
 
               {/* Completion Status Chart */}
-              <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 p-6 rounded-xl shadow-xl border border-neutral-700">
-                <h3 className="text-xl font-semibold mb-6 text-sky-400 flex items-center gap-2">
+              <div className={cn(
+                "p-6 rounded-xl shadow-xl border bg-gradient-to-br",
+                isDark 
+                  ? "from-neutral-800 to-neutral-900 border-neutral-700" 
+                  : "from-white to-gray-50 border-gray-200"
+              )}>
+                <h3 className={cn(
+                  "text-xl font-semibold mb-6 flex items-center gap-2",
+                  isDark ? "text-sky-400" : "text-blue-600"
+                )}>
                   <IoCheckmarkDoneCircleOutline />
                   Task Status Breakdown
                 </h3>
@@ -449,8 +534,16 @@ const ProductivityReports: React.FC = () => {
             </div>
 
             {/* Trend Analysis */}
-            <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 p-6 rounded-xl shadow-xl border border-neutral-700">
-              <h3 className="text-xl font-semibold mb-6 text-sky-400 flex items-center gap-2">
+            <div className={cn(
+              "p-6 rounded-xl shadow-xl border bg-gradient-to-br",
+              isDark 
+                ? "from-neutral-800 to-neutral-900 border-neutral-700" 
+                : "from-white to-gray-50 border-gray-200"
+            )}>
+              <h3 className={cn(
+                "text-xl font-semibold mb-6 flex items-center gap-2",
+                isDark ? "text-sky-400" : "text-blue-600"
+              )}>
                 <IoTrendingUpOutline />
                 Completion Rate Trend
               </h3>
@@ -462,26 +555,60 @@ const ProductivityReports: React.FC = () => {
             </div>
 
             {/* Detailed Stats Table */}
-            <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 p-6 rounded-xl shadow-xl border border-neutral-700">
-              <h3 className="text-xl font-semibold mb-6 text-sky-400 flex items-center gap-2">
+            <div className={cn(
+              "p-6 rounded-xl shadow-xl border bg-gradient-to-br",
+              isDark 
+                ? "from-neutral-800 to-neutral-900 border-neutral-700" 
+                : "from-white to-gray-50 border-gray-200"
+            )}>
+              <h3 className={cn(
+                "text-xl font-semibold mb-6 flex items-center gap-2",
+                isDark ? "text-sky-400" : "text-blue-600"
+              )}>
                 <IoListCircleOutline />
                 Detailed Priority Breakdown
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Priority</th>
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Total</th>
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Completed</th>
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Pending</th>
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Overdue</th>
-                      <th className="text-left py-3 px-4 font-semibold text-neutral-300">Completion Rate</th>
+                    <tr className={cn(
+                      "border-b",
+                      isDark ? "border-neutral-700" : "border-gray-200"
+                    )}>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Priority</th>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Total</th>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Completed</th>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Pending</th>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Overdue</th>
+                      <th className={cn(
+                        "text-left py-3 px-4 font-semibold",
+                        isDark ? "text-neutral-300" : "text-gray-700"
+                      )}>Completion Rate</th>
                     </tr>
                   </thead>
                   <tbody>
                     {statsData.labelStats.map((stat) => (
-                      <tr key={stat.label} className="border-b border-neutral-800 hover:bg-neutral-800/30 transition-colors">
+                      <tr key={stat.label} className={cn(
+                        "border-b transition-colors",
+                        isDark 
+                          ? "border-neutral-800 hover:bg-neutral-800/30" 
+                          : "border-gray-100 hover:bg-gray-50"
+                      )}>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
                             {stat.label.includes("high") ? (
@@ -502,7 +629,10 @@ const ProductivityReports: React.FC = () => {
                         <td className="py-3 px-4 text-red-400 font-semibold">{stat.overdue}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-20 bg-neutral-700 rounded-full h-2">
+                            <div className={cn(
+                              "w-20 rounded-full h-2",
+                              isDark ? "bg-neutral-700" : "bg-gray-200"
+                            )}>
                               <div
                                 className="bg-sky-400 h-2 rounded-full transition-all duration-300"
                                 style={{ width: `${stat.completionRate}%` }}
@@ -525,11 +655,20 @@ const ProductivityReports: React.FC = () => {
         {/* No Data State */}
         {!isLoading && !error && (!statsData || statsData.overallStats.totalTasks === 0) && (
           <div className="col-span-full text-center py-20 flex flex-col items-center justify-center">
-            <TbListSearch className="size-20 text-neutral-600 mb-4" />
-            <p className="text-neutral-400 text-xl font-semibold">
+            <TbListSearch className={cn(
+              "size-20 mb-4",
+              isDark ? "text-neutral-600" : "text-gray-400"
+            )} />
+            <p className={cn(
+              "text-xl font-semibold",
+              isDark ? "text-neutral-400" : "text-gray-600"
+            )}>
               No productivity data available yet.
             </p>
-            <p className="text-neutral-500 mt-2">
+            <p className={cn(
+              "mt-2",
+              isDark ? "text-neutral-500" : "text-gray-500"
+            )}>
               Add some tasks and mark them complete to see your progress!
             </p>
           </div>

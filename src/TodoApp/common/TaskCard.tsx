@@ -12,7 +12,7 @@ import { priorityLabels } from "@/const/const";
 import type { ITask, TaskLabel } from "@/api/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { formatDateTimeForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateUtils";
 
 // Utility function to truncate text - memoized
 const truncateText = (text: string, maxLength: number) => {
@@ -59,8 +59,8 @@ const TaskCard = memo<TaskCardProps>(
     const dateDisplays = useMemo(
       () => ({
         createdAt: formatDateTimeForDisplay(task.createdAt),
-        startDate: formatDateTimeForDisplay(task.startDate),
-        dueDate: formatDateTimeForDisplay(task.dueDate),
+        startDate: formatDateForDisplay(task.startDate),
+        dueDate: formatDateForDisplay(task.dueDate),
       }),
       [task.createdAt, task.startDate, task.dueDate]
     );
@@ -103,54 +103,82 @@ const TaskCard = memo<TaskCardProps>(
     return (
       <div
         className={cn(
-          "relative border border-neutral-700 p-4 rounded-lg flex items-start justify-between gap-4 bg-neutral-800 shadow-md transition-all duration-200",
+          "relative border border-neutral-700 p-5 rounded-xl flex items-start justify-between gap-4 bg-gradient-to-br from-neutral-800 to-neutral-900 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-neutral-600 group",
           priorityBorderColor
         )}
       >
+        {/* Task ID Badge */}
+        <div className="absolute top-3 right-3 bg-sky-500/10 border border-sky-500/30 rounded-full px-3 py-1 backdrop-blur-sm">
+          <span className="text-xs font-mono text-sky-400 font-medium">
+            ID: {task._id.slice(-6)}
+          </span>
+        </div>
+
+        {/* Action Icons */}
+        <div className="absolute top-5 right-30 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <BsFillPencilFill
+            className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
+            onClick={onEdit}
+          />
+          <MdOutlineDelete
+            className="cursor-pointer size-6 text-neutral-400 hover:text-red-500 transition-colors"
+            onClick={onDelete}
+          />
+        </div>
+
         {/* Left Side: Checkbox and Text Info */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 flex-1 pr-32">
           <input
             type="checkbox"
             checked={task.completed}
             onChange={onToggle}
-            className="mt-1 size-5 accent-sky-500 focus:ring-sky-500 border-neutral-600 rounded"
+            className="mt-1 size-5 accent-sky-500 focus:ring-sky-500 border-neutral-600 rounded transition-all duration-200"
           />
-          <div>
+          <div className="flex-1">
             <p className={textStyle} onClick={handleTaskTextClick}>
               {truncatedTitle}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <p className="text-sm text-neutral-400 mt-1">
-                <span className="font-bold">Created At</span>:{" "}
-                {dateDisplays.createdAt}
+            <div className="flex gap-2">
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-sm text-neutral-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full"></span>
+                <span className="font-medium">Created</span>
+                <span className="text-neutral-300">{dateDisplays.createdAt}</span>
               </p>
-              <div className="flex gap-1 flex-wrap">
-                <p className="text-sm text-neutral-400 mt-0.5">
-                  <span className="font-bold">From</span>:{" "}
-                  {dateDisplays.startDate}
-                </p>
-                <p className="text-sm text-neutral-400 mt-0.5">
-                  <span className="font-bold">To</span>: {dateDisplays.dueDate}
-                </p>
+            </div>
+            <div className="flex items-center gap-4 mt-2">
+              <p className="text-sm text-neutral-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                <span className="font-medium">From</span>
+                <span className="text-neutral-300">{dateDisplays.startDate}</span>
+              </p>
+              <p className="text-sm text-neutral-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+                <span className="font-medium">To</span>
+                <span className="text-neutral-300">{dateDisplays.dueDate}</span>
+              </p>
+            </div>
+            </div>
+            <div className="flex items-center gap-3 mt-3">
+              <span className={completionStatus.className}>
+                {completionStatus.text}
+              </span>
+              {/* Priority Badge */}
+              <div className={`px-2 py-1 text-xs font-medium rounded-md ${
+                task.label === 'high priority' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                task.label === 'medium priority' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                task.label === 'low priority' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30'
+              }`}>
+                {task.label?.replace(' priority', '').toUpperCase() || 'NONE'}
               </div>
             </div>
-            <span className={completionStatus.className}>
-              {completionStatus.text}
-            </span>
           </div>
         </div>
 
-        {/* Right Side: Priority, Edit, Delete */}
-        <div className="flex flex-wrap items-center gap-2 ml-auto">
+        {/* Priority Dropdown (Hidden but functional) */}
+        <div className="hidden">
           <Select value={task.label} onValueChange={handlePriorityChange}>
-            
-            {/* // =================== Showing Priority Dropdown Start ==================== */}
-
-            {/* <SelectTrigger className="w-[120px] bg-neutral-700 border-neutral-600 text-white hover:border-sky-500 transition-colors">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger> */}
-
-           {/* // =================== Showing Priority Dropdown End ==================== */}
             <SelectContent className="bg-neutral-700 border-neutral-600 text-white">
               {priorityLabels.map((label) => (
                 <SelectItem
@@ -163,17 +191,6 @@ const TaskCard = memo<TaskCardProps>(
               ))}
             </SelectContent>
           </Select>
-          {/* Action Icons */}
-          <div className="flex items-center gap-2">
-            <BsFillPencilFill
-              className="cursor-pointer size-5 text-neutral-400 hover:text-sky-400 transition-colors"
-              onClick={onEdit}
-            />
-            <MdOutlineDelete
-              className="cursor-pointer size-6 text-neutral-400 hover:text-red-500 transition-colors"
-              onClick={onDelete}
-            />
-          </div>
         </div>
       </div>
     );

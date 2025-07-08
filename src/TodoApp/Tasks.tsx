@@ -311,13 +311,21 @@ function Tasks() {
         <main className="flex-1 flex flex-col p-4">
           {tasks.length === 0 ? (
             <div className="text-center py-16">
-              <div className="bg-neutral-700/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                <FaPlus className="text-4xl text-neutral-400" />
+              <div className={`rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 ${
+                isDark ? 'bg-neutral-700/30' : 'bg-gray-100'
+              }`}>
+                <FaPlus className={`text-4xl ${
+                  isDark ? 'text-neutral-400' : 'text-gray-400'
+                }`} />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-300 mb-2">
+              <h3 className={`text-xl font-semibold mb-2 ${
+                isDark ? 'text-neutral-300' : 'text-gray-800'
+              }`}>
                 {hasActiveFilters ? "No tasks match your filters" : "No tasks yet"}
               </h3>
-              <p className="text-neutral-400 mb-6">
+              <p className={`mb-6 ${
+                isDark ? 'text-neutral-400' : 'text-gray-600'
+              }`}>
                 {hasActiveFilters 
                   ? "Try adjusting your filters or create a new task."
                   : "Create your first task to get started!"
@@ -353,7 +361,11 @@ function Tasks() {
         {totalPages > 1 && (
           <footer className="mt-12 flex justify-center">
             <Pagination>
-              <PaginationContent className="bg-neutral-800 rounded-lg p-2 shadow-inner border border-neutral-700">
+              <PaginationContent className={`rounded-lg p-2 shadow-inner border ${
+                isDark 
+                  ? 'bg-neutral-800 border-neutral-700' 
+                  : 'bg-white border-gray-200'
+              }`}>
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}

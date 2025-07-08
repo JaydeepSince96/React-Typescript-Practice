@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { SidebarLayout } from "@/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,16 @@ import { Dialog } from "@/components/ui/dialog";
 import SubtaskDialogForm from "./common/SubtaskDialogForm";
 import TaskDialogForm from "./common/TaskDialogForm";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTheme } from "@/contexts/ThemeContext";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 const TaskDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +67,24 @@ const TaskDetails: React.FC = () => {
   const [subtaskDeleteDialogOpen, setSubtaskDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; title: string } | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  // Calculate paginated subtasks
+  const { paginatedSubtasks, totalPages } = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginated = subtasks.slice(startIndex, endIndex);
+    const total = Math.ceil(subtasks.length / itemsPerPage);
+    
+    return {
+      paginatedSubtasks: paginated,
+      totalPages: total,
+      totalCount: subtasks.length,
+    };
+  }, [subtasks, currentPage, itemsPerPage]);
+
   const handleOpenAddDialog = () => {
     setEditingSubtask(undefined);
     setDialogOpen(true);
@@ -71,6 +98,14 @@ const TaskDetails: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingSubtask(undefined);
+    
+    // Reset to last page when adding a new subtask to see the latest addition
+    setTimeout(() => {
+      const newTotalPages = Math.ceil(subtasks.length / itemsPerPage);
+      if (newTotalPages > 0 && !editingSubtask) {
+        setCurrentPage(newTotalPages); // Go to last page to see new subtask
+      }
+    }, 100);
   };
 
   const handleOpenTaskEditDialog = () => {
@@ -118,9 +153,20 @@ const TaskDetails: React.FC = () => {
       });
       setSubtaskDeleteDialogOpen(false);
       setItemToDelete(null);
+      
+      // Reset to first page if current page becomes empty after deletion
+      const newTotalPages = Math.ceil((subtasks.length - 1) / itemsPerPage);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
     } catch (error) {
       console.error('Error deleting subtask:', error);
     }
+  };
+
+  // Pagination handler
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleToggleSubtask = async (subtaskId: string) => {
@@ -188,11 +234,7 @@ const TaskDetails: React.FC = () => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return null;
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
+      return formatDateForDisplay(dateString);
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
       return null;
@@ -302,7 +344,7 @@ const TaskDetails: React.FC = () => {
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>Created:</span>
               <span className={isDark ? 'text-neutral-300' : 'text-gray-700'}>
-                {new Date(task.createdAt).toLocaleDateString()}
+                {formatDateForDisplay(task.createdAt)}
               </span>
             </div>
 
@@ -312,7 +354,7 @@ const TaskDetails: React.FC = () => {
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>Start:</span>
               <span className={isDark ? 'text-neutral-300' : 'text-gray-700'}>
-                {new Date(task.startDate).toLocaleDateString()}
+                {formatDateForDisplay(task.startDate)}
               </span>
             </div>
 
@@ -322,7 +364,7 @@ const TaskDetails: React.FC = () => {
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>Due:</span>
               <span className={isDark ? 'text-neutral-300' : 'text-gray-700'}>
-                {new Date(task.dueDate).toLocaleDateString()}
+                {formatDateForDisplay(task.dueDate)}
               </span>
             </div>
 
@@ -331,7 +373,7 @@ const TaskDetails: React.FC = () => {
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>Updated:</span>
               <span className={isDark ? 'text-neutral-300' : 'text-gray-700'}>
-                {new Date(task.updatedAt).toLocaleDateString()}
+                {formatDateForDisplay(task.updatedAt)}
               </span>
             </div>
           </div>
@@ -441,8 +483,9 @@ const TaskDetails: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {subtasks.map((subtask) => {
+              <>
+                <div className="space-y-4">
+                  {paginatedSubtasks.map((subtask) => {
                   // Debug: Log subtask data to console
                   console.log("Rendering subtask:", {
                     id: subtask._id,
@@ -590,7 +633,45 @@ const TaskDetails: React.FC = () => {
                     </div>
                   );
                 })}
-              </div>
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <Pagination>
+                      <PaginationContent className={`rounded-lg p-2 shadow-inner border ${
+                        isDark 
+                          ? 'bg-neutral-800 border-neutral-700' 
+                          : 'bg-white border-gray-200'
+                      }`}>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                            className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                        {[...Array(totalPages)].map((_, i) => (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              isActive={i + 1 === currentPage}
+                              onClick={() => handlePageChange(i + 1)}
+                              className="cursor-pointer"
+                            >
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                            className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

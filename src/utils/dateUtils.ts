@@ -52,22 +52,38 @@ export const parseDateFromAPI = (dateString: string): Date => {
 };
 
 /**
- * Format date for display in UI
+ * Format date for display in UI (DD/MM/YYYY format)
  * @param date - Date object or date string
- * @returns formatted date string for display
+ * @returns formatted date string for display in DD/MM/YYYY format
  */
 export const formatDateForDisplay = (date: Date | string): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  let dateObj: Date;
+  
+  if (typeof date === 'string') {
+    // Check if it's in backend format (DD-MM-YY, HH:MM)
+    if (date.includes('-') && date.includes(',')) {
+      try {
+        dateObj = parseDateFromAPI(date);
+      } catch {
+        dateObj = new Date(date);
+      }
+    } else {
+      dateObj = new Date(date);
+    }
+  } else {
+    dateObj = date;
+  }
   
   if (isNaN(dateObj.getTime())) {
     return 'Invalid Date';
   }
   
-  return dateObj.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  // Ensure DD/MM/YYYY format
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const year = dateObj.getFullYear().toString();
+  
+  return `${day}/${month}/${year}`;
 };
 
 /**

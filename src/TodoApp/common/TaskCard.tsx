@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   Select,
   // SelectTrigger,
@@ -40,6 +40,8 @@ type TaskCardProps = {
 const TaskCard = memo<TaskCardProps>(
   ({ task, onToggle, onSetPriority, onEdit, onDelete }) => {
     const navigate = useNavigate();
+    const [showCopyTooltip, setShowCopyTooltip] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     // Memoized priority border color
     const priorityBorderColor = useMemo(() => {
@@ -100,6 +102,18 @@ const TaskCard = memo<TaskCardProps>(
       [onSetPriority]
     );
 
+    // Copy task ID to clipboard
+    const handleCopyTaskId = useCallback(async (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent other click handlers
+      try {
+        await navigator.clipboard.writeText(task._id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+      } catch (err) {
+        console.error('Failed to copy task ID:', err);
+      }
+    }, [task._id, setCopied]);
+
     return (
       <div
         className={cn(
@@ -108,10 +122,23 @@ const TaskCard = memo<TaskCardProps>(
         )}
       >
         {/* Task ID Badge */}
-        <div className="absolute top-3 right-3 bg-sky-500/10 border border-sky-500/30 rounded-full px-3 py-1 backdrop-blur-sm">
-          <span className="text-xs font-mono text-sky-400 font-medium">
-            ID: {task._id.slice(-6)}
-          </span>
+        <div className="absolute top-3 right-3 group/id">
+          <div 
+            className="bg-sky-500/10 border border-sky-500/30 rounded-full px-3 py-1 backdrop-blur-sm cursor-pointer hover:bg-sky-500/20 hover:border-sky-500/50 transition-all duration-200"
+            onClick={handleCopyTaskId}
+            onMouseEnter={() => setShowCopyTooltip(true)}
+            onMouseLeave={() => setShowCopyTooltip(false)}
+          >
+            <span className="text-xs font-mono text-sky-400 font-medium">
+              ID: {task._id.slice(-6)}
+            </span>
+          </div>
+          {/* Tooltip */}
+          {(showCopyTooltip || copied) && (
+            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-neutral-900 text-white text-xs px-2 py-1 rounded shadow-lg border border-neutral-600 whitespace-nowrap z-50">
+              {copied ? 'Copied!' : 'Click to copy ID'}
+            </div>
+          )}
         </div>
 
         {/* Action Icons */}

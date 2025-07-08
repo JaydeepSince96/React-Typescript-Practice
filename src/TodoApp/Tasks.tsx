@@ -24,6 +24,7 @@ import {
 import { TaskLabel } from "@/api/types";
 import type { ITask } from "@/api/types";
 import withLoadingAndError from "@/hoc/withLoadingAndError";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 
 function Tasks() {
   const [open, setOpen] = useState(false);
@@ -36,6 +37,10 @@ function Tasks() {
     startDate: null as Date | null,
     endDate: null as Date | null,
   });
+
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -118,13 +123,25 @@ function Tasks() {
     setOpen(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = useCallback((id: string) => {
+    const task = allTasks.find(t => t._id === id);
+    if (task) {
+      setTaskToDelete({ id: task._id, title: task.title });
+      setDeleteDialogOpen(true);
+    }
+  }, [allTasks]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!taskToDelete) return;
+    
     try {
-      await deleteTaskMutation.mutateAsync(id);
+      await deleteTaskMutation.mutateAsync(taskToDelete.id);
+      setDeleteDialogOpen(false);
+      setTaskToDelete(null);
     } catch (error) {
       console.error('Error deleting task:', error);
     }
-  }, [deleteTaskMutation]);
+  }, [deleteTaskMutation, taskToDelete]);
 
   const handleApplyFilters = useCallback((newFilters: typeof filters) => {
     setFilters(newFilters);
@@ -228,6 +245,24 @@ function Tasks() {
           </footer>
         )}
       </div>
+      
+      {/* Task Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Task"
+        description="Are you sure you want to delete this task? This action cannot be undone and will also delete all associated subtasks."
+        confirmLabel="Delete Task"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setTaskToDelete(null);
+        }}
+        isDestructive={true}
+        isLoading={deleteTaskMutation.isPending}
+        itemId={taskToDelete?.id}
+        itemType="task"
+      />
     </SidebarLayout>
   );
 }

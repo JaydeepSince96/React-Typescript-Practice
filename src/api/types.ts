@@ -46,8 +46,10 @@ export interface ICreateTaskPayload {
 }
 
 export interface IUpdateTaskPayload {
+  title?: string;
   completed?: boolean;
   label?: TaskLabel;
+  startDate?: string; // dd/mm/yyyy format
   dueDate?: string; // dd/mm/yyyy format
 }
 

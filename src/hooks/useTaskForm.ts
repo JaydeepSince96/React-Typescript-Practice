@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,6 +35,25 @@ export function useTaskForm(options: UseTaskFormOptions = {}) {
     defaultValues,
   });
 
+  // Update form when editTask changes
+  useEffect(() => {
+    if (editTask) {
+      form.reset({
+        task: editTask.title || "",
+        startDate: editTask.startDate ? new Date(editTask.startDate) : null,
+        endDate: editTask.dueDate ? new Date(editTask.dueDate) : null,
+        priority: editTask.label || TaskLabel.LOW_PRIORITY,
+      });
+    } else {
+      form.reset({
+        task: "",
+        startDate: null,
+        endDate: null,
+        priority: TaskLabel.LOW_PRIORITY,
+      });
+    }
+  }, [editTask, form]);
+
   // Reset form when editTask changes
   const resetForm = useCallback(() => {
     form.reset(defaultValues);
@@ -48,6 +67,8 @@ export function useTaskForm(options: UseTaskFormOptions = {}) {
         await updateTaskMutation.mutateAsync({
           id: editTask._id,
           payload: { 
+            title: data.task,
+            startDate: data.startDate ? formatDateForAPI(data.startDate) : undefined,
             dueDate: data.endDate ? formatDateForAPI(data.endDate) : undefined,
             label: data.priority,
           }

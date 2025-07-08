@@ -146,6 +146,78 @@ export const taskAPI = {
   updateTaskDueDate: async (id: string, dueDate: string): Promise<ITask> => {
     return taskAPI.updateTask(id, { dueDate });
   },
+
+  // Get filtered tasks
+  getFilteredTasks: async (filters: {
+    searchId?: string;
+    priority?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    tasks: ITask[];
+    pagination: {
+      totalCount: number;
+      totalPages: number;
+      currentPage: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  }> => {
+    try {
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      if (filters.searchId) queryParams.append('searchId', filters.searchId);
+      if (filters.priority) queryParams.append('priority', filters.priority);
+      if (filters.status) queryParams.append('status', filters.status);
+      if (filters.startDate) queryParams.append('startDate', filters.startDate);
+      if (filters.endDate) queryParams.append('endDate', filters.endDate);
+      if (filters.page) queryParams.append('page', filters.page.toString());
+      if (filters.limit) queryParams.append('limit', filters.limit.toString());
+
+      const url = `${API_ENDPOINTS.TASKS}/filtered${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      
+      console.log('🚀 API call:', {
+        filters,
+        url,
+        queryParams: queryParams.toString()
+      });
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: createAPIHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: IAPIResponse<{
+        tasks: ITask[];
+        pagination: {
+          totalCount: number;
+          totalPages: number;
+          currentPage: number;
+          hasNextPage: boolean;
+          hasPrevPage: boolean;
+        };
+      }> = await response.json();
+      
+      console.log('✅ API response:', result);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch filtered tasks');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching filtered tasks:', error);
+      throw new Error(handleAPIError(error));
+    }
+  },
 };
 
 // Export individual functions for easier importing
@@ -158,4 +230,5 @@ export const {
   toggleTaskCompletion,
   updateTaskLabel,
   updateTaskDueDate,
+  getFilteredTasks,
 } = taskAPI;

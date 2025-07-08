@@ -35,6 +35,7 @@ export const useCreateTask = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -49,6 +50,7 @@ export const useUpdateTask = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -62,6 +64,7 @@ export const useDeleteTask = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -76,6 +79,7 @@ export const useToggleTaskCompletion = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -90,6 +94,7 @@ export const useUpdateTaskLabel = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -104,6 +109,7 @@ export const useUpdateTaskDueDate = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASK_STATS });
+      queryClient.invalidateQueries({ queryKey: ['filtered-tasks'] });
     },
   });
 };
@@ -122,5 +128,32 @@ export const useTestStatsEndpoint = () => {
     queryKey: ['test-stats'],
     queryFn: statsAPI.testStatsEndpoint,
     enabled: false, // Only run manually
+  });
+};
+
+// Filtered tasks hook
+export const useGetFilteredTasks = (filters: {
+  searchId?: string;
+  priority?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  return useQuery({
+    queryKey: ['filtered-tasks', filters],
+    queryFn: () => taskAPI.getFilteredTasks(filters),
+    staleTime: 30 * 1000, // 30 seconds
+    // Enable if there are any meaningful filters (including pagination)
+    enabled: !!(
+      filters.searchId?.trim() || 
+      (filters.priority && filters.priority !== 'All') ||
+      (filters.status && filters.status !== 'All') ||
+      filters.startDate || 
+      filters.endDate ||
+      (filters.page && filters.page > 1) ||
+      filters.limit
+    ),
   });
 };

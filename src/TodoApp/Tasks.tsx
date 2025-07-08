@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import TaskDialogForm from "./common/TaskDialogForm";
@@ -20,8 +20,8 @@ import TaskList from "./TaskList";
 import {
   useGetAllTasks,
   useDeleteTask,
+  useGetFilteredTasks,
 } from "@/hooks/useApiHooks";
-import { TaskLabel } from "@/api/types";
 import type { ITask } from "@/api/types";
 import withLoadingAndError from "@/hoc/withLoadingAndError";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
@@ -46,53 +46,89 @@ function Tasks() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  // Determine if we should use filtered API or all tasks API
+  const hasActiveFilters = !!(
+    filters.searchId ||
+    (filters.priority && filters.priority !== 'All') ||
+    (filters.status && filters.status !== 'All') ||
+    filters.startDate ||
+    filters.endDate
+  );
+
+  // Convert filters to API format
+  const apiFilters = useMemo(() => {
+    const converted = {
+      searchId: filters.searchId || undefined,
+      priority: filters.priority !== 'All' ? filters.priority : undefined,
+      status: filters.status !== 'All' ? filters.status : undefined,
+      startDate: filters.startDate ? filters.startDate.toISOString().split('T')[0] : undefined,
+      endDate: filters.endDate ? filters.endDate.toISOString().split('T')[0] : undefined,
+      page: currentPage,
+      limit: itemsPerPage,
+    };
+    
+    // Debug logging
+    console.log('🔍 Filter conversion:', {
+      originalFilters: filters,
+      convertedFilters: converted,
+      hasActiveFilters
+    });
+    
+    return converted;
+  }, [filters, currentPage, itemsPerPage, hasActiveFilters]);
+
   // API hooks
-  const { data: allTasks = [] } = useGetAllTasks();
+  const { data: allTasks = [], isLoading: allTasksLoading, error: allTasksError } = useGetAllTasks();
+  const { 
+    data: filteredData, 
+    isLoading: filteredLoading, 
+    error: filteredError 
+  } = useGetFilteredTasks(apiFilters);
+  
   const deleteTaskMutation = useDeleteTask();
 
-  // Memoized filtered tasks
-  const filteredTasks = useMemo(() => {
-    return allTasks.filter((task) => {
-      const { searchId, priority, status, startDate, endDate } = filters;
-      
-      // Search by ID - using task._id instead of task.id
-      if (searchId && !task._id.includes(searchId)) return false;
-      
-      // Filter by priority - map API priority to display priority
-      if (priority !== "All") {
-        const priorityMap: { [key: string]: TaskLabel } = {
-          "High Priority": TaskLabel.HIGH_PRIORITY,
-          "Medium Priority": TaskLabel.MEDIUM_PRIORITY,
-          "Low Priority": TaskLabel.LOW_PRIORITY,
-        };
-        if (task.label !== priorityMap[priority]) return false;
-      }
-      
-      // Filter by status
-      if (status !== "All") {
-        if (status === "Done" && !task.completed) return false;
-        if (status === "Pending" && task.completed) return false;
-      }
-      
-      // Filter by date range (using createdAt from API)
-      if (startDate && new Date(task.createdAt) < startDate) return false;
-      if (endDate) {
-        const adjustedEndDate = new Date(endDate);
-        adjustedEndDate.setHours(23, 59, 59, 999);
-        if (new Date(task.createdAt) > adjustedEndDate) return false;
-      }
-      
-      return true;
+  // Determine which data to use
+  const isLoading = hasActiveFilters ? filteredLoading : allTasksLoading;
+  const error = hasActiveFilters ? filteredError : allTasksError;
+  
+  // Calculate tasks and pagination
+  const { tasks, totalPages, totalCount } = useMemo(() => {
+    console.log('📊 Data calculation:', {
+      hasActiveFilters,
+      filteredData: filteredData ? {
+        tasksCount: filteredData.tasks.length,
+        totalCount: filteredData.pagination.totalCount,
+        totalPages: filteredData.pagination.totalPages
+      } : null,
+      allTasksCount: allTasks.length,
+      currentPage
     });
-  }, [allTasks, filters]);
 
-  const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
-  const paginatedTasks = useMemo(() => {
-    return filteredTasks.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-  }, [filteredTasks, currentPage]);
+    if (hasActiveFilters && filteredData) {
+      return {
+        tasks: filteredData.tasks,
+        totalPages: filteredData.pagination.totalPages,
+        totalCount: filteredData.pagination.totalCount,
+      };
+    } else {
+      // For unfiltered data, handle client-side pagination
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedTasks = allTasks.slice(startIndex, endIndex);
+      const totalPages = Math.ceil(allTasks.length / itemsPerPage);
+      
+      return {
+        tasks: paginatedTasks,
+        totalPages,
+        totalCount: allTasks.length,
+      };
+    }
+  }, [hasActiveFilters, filteredData, allTasks, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   // Memoized priority button classes
   const getPriorityButtonClasses = useCallback((priorityValue: string) => {
@@ -110,26 +146,19 @@ function Tasks() {
     }`;
   }, []);
 
-  React.useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
-    } else if (totalPages === 0) {
-      setCurrentPage(1);
-    }
-  }, [filters, totalPages, currentPage]);
-
   const handleEdit = useCallback((task: ITask) => {
     setEditTask(task);
     setOpen(true);
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    const task = allTasks.find(t => t._id === id);
+    // Find task from the current tasks array
+    const task = tasks.find(t => t._id === id) || allTasks.find(t => t._id === id);
     if (task) {
       setTaskToDelete({ id: task._id, title: task.title });
       setDeleteDialogOpen(true);
     }
-  }, [allTasks]);
+  }, [tasks, allTasks]);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!taskToDelete) return;
@@ -166,6 +195,35 @@ function Tasks() {
     navigate(`/priority?level=${encodeURIComponent(priorityLabel)}`);
   }, [navigate]);
 
+  // Handle pagination
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <SidebarLayout>
+        <div className="p-6 text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-sky-400 border-t-transparent mx-auto mb-4"></div>
+          Loading tasks...
+        </div>
+      </SidebarLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <SidebarLayout>
+        <div className="p-6 text-center text-white">
+          <p className="text-red-400 mb-4">Failed to load tasks</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Retry
+          </Button>
+        </div>
+      </SidebarLayout>
+    );
+  }
+
   return (
     <SidebarLayout>
       <div className="p-6 bg-neutral-900 min-h-screen flex flex-col">
@@ -189,12 +247,54 @@ function Tasks() {
           />
         </header>
 
+        {/* Filter status indicator */}
+        {hasActiveFilters && (
+          <div className="mb-4 p-3 bg-sky-600/10 border border-sky-600/30 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sky-400 text-sm font-medium">
+                Showing {totalCount} filtered result{totalCount !== 1 ? 's' : ''}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({
+                  searchId: "",
+                  priority: "All",
+                  status: "All",
+                  startDate: null,
+                  endDate: null,
+                })}
+                className="text-sky-400 hover:text-sky-300"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        )}
+
         <main className="flex-1 flex flex-col p-4">
-          <TaskList
-            tasks={paginatedTasks}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {tasks.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-neutral-700/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <FaPlus className="text-4xl text-neutral-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-300 mb-2">
+                {hasActiveFilters ? "No tasks match your filters" : "No tasks yet"}
+              </h3>
+              <p className="text-neutral-400 mb-6">
+                {hasActiveFilters 
+                  ? "Try adjusting your filters or create a new task."
+                  : "Create your first task to get started!"
+                }
+              </p>
+            </div>
+          ) : (
+            <TaskList
+              tasks={tasks}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </main>
 
         <Dialog open={open} onOpenChange={setOpen}>
@@ -220,14 +320,16 @@ function Tasks() {
               <PaginationContent className="bg-neutral-800 rounded-lg p-2 shadow-inner border border-neutral-700">
                 <PaginationItem>
                   <PaginationPrevious
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                    className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                   />
                 </PaginationItem>
                 {[...Array(totalPages)].map((_, i) => (
                   <PaginationItem key={i}>
                     <PaginationLink
                       isActive={i + 1 === currentPage}
-                      onClick={() => setCurrentPage(i + 1)}
+                      onClick={() => handlePageChange(i + 1)}
+                      className="cursor-pointer"
                     >
                       {i + 1}
                     </PaginationLink>
@@ -235,9 +337,8 @@ function Tasks() {
                 ))}
                 <PaginationItem>
                   <PaginationNext
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(p + 1, totalPages))
-                    }
+                    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                    className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                   />
                 </PaginationItem>
               </PaginationContent>

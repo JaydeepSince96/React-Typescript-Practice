@@ -118,9 +118,9 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               </SelectTrigger>
               <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
                 <SelectItem value="All">All Priorities</SelectItem>
-                <SelectItem value="High">High</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
+                <SelectItem value="High Priority">High Priority</SelectItem>
+                <SelectItem value="Medium Priority">Medium Priority</SelectItem>
+                <SelectItem value="Low Priority">Low Priority</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -143,7 +143,7 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               </SelectTrigger>
               <SelectContent className="bg-neutral-800 border-neutral-700 text-white">
                 <SelectItem value="All">All Statuses</SelectItem>
-                <SelectItem value="Done">Done</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
               </SelectContent>
             </Select>

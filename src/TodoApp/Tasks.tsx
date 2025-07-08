@@ -310,27 +310,47 @@ function Tasks() {
 
         <main className="flex-1 flex flex-col p-4">
           {tasks.length === 0 ? (
-            <div className="text-center py-16">
-              <div className={`rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 ${
+            <div className="text-center py-20">
+              <div className={`rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6 ${
                 isDark ? 'bg-neutral-700/30' : 'bg-gray-100'
               }`}>
-                <FaPlus className={`text-4xl ${
+                <FaPlus className={`text-5xl ${
                   isDark ? 'text-neutral-400' : 'text-gray-400'
                 }`} />
               </div>
-              <h3 className={`text-xl font-semibold mb-2 ${
-                isDark ? 'text-neutral-300' : 'text-gray-800'
+              <h3 className={`text-2xl font-bold mb-3 ${
+                isDark ? 'text-neutral-200' : 'text-gray-800'
               }`}>
-                {hasActiveFilters ? "No tasks match your filters" : "No tasks yet"}
+                {hasActiveFilters ? "No tasks match your filters" : "Welcome to TaskSync!"}
               </h3>
-              <p className={`mb-6 ${
+              <p className={`text-lg mb-8 max-w-md mx-auto ${
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>
                 {hasActiveFilters 
-                  ? "Try adjusting your filters or create a new task."
-                  : "Create your first task to get started!"
+                  ? "Try adjusting your filters or create a new task to get started."
+                  : "You don't have any tasks yet. Create your first task to begin organizing your work and boosting your productivity!"
                 }
               </p>
+              {!hasActiveFilters && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button
+                    onClick={handleAddNewTask}
+                    className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 ${
+                      isDark 
+                        ? 'bg-sky-600 hover:bg-sky-700 text-white' 
+                        : 'bg-sky-600 hover:bg-sky-700 text-white'
+                    }`}
+                  >
+                    <FaPlus className="inline mr-3 text-lg" />
+                    Create Your First Task
+                  </button>
+                  <div className={`text-sm ${
+                    isDark ? 'text-neutral-500' : 'text-gray-500'
+                  }`}>
+                    or use the + button in the bottom right
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <TaskList
@@ -345,7 +365,12 @@ function Tasks() {
           <DialogTrigger asChild>
             <Button
               onClick={handleAddNewTask}
-              className="fixed bottom-6 right-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 z-40"
+              className={`fixed bottom-6 right-6 font-semibold py-3 px-6 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 z-50 ring-2 ring-offset-2 ${
+                isDark 
+                  ? 'bg-sky-600 hover:bg-sky-700 text-white ring-sky-400/20 ring-offset-neutral-900' 
+                  : 'bg-sky-600 hover:bg-sky-700 text-white ring-sky-400/30 ring-offset-white'
+              }`}
+              size="lg"
             >
               <FaPlus className="size-4" />
               Add New Task
@@ -429,13 +454,13 @@ const TasksWithLoadingAndError = withLoadingAndError<TasksProps>(Tasks, {
 });
 
 export default function TasksContainer() {
-  const { data: allTasks = [], isLoading, error } = useGetAllTasks();
+  const { isLoading, error } = useGetAllTasks();
   
   return (
     <TasksWithLoadingAndError
       isLoading={isLoading}
       error={error}
-      isEmpty={allTasks.length === 0}
+      isEmpty={false} // Let the Tasks component handle its own empty state
     />
   );
 }

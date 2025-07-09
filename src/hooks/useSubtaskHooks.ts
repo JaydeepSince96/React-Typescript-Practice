@@ -8,10 +8,12 @@ import {
   deleteSubtask,
   getSubtaskStats
 } from '@/api/subtask/subtask-api';
+import { taskAPI } from '@/api/task/task-api';
 import type {
   ISubtask,
   ICreateSubtaskPayload,
-  IUpdateSubtaskPayload
+  IUpdateSubtaskPayload,
+  ITask
 } from '@/api/types';
 
 // Query keys
@@ -20,6 +22,38 @@ export const subtaskKeys = {
   byTask: (taskId: string) => [...subtaskKeys.all, 'task', taskId] as const,
   byId: (subtaskId: string) => [...subtaskKeys.all, 'detail', subtaskId] as const,
   stats: (taskId: string) => [...subtaskKeys.all, 'stats', taskId] as const,
+};
+
+// Helper function to automatically manage main task completion based on subtasks
+const autoManageTaskCompletion = async (taskId: string, queryClient: ReturnType<typeof useQueryClient>) => {
+  try {
+    // Get current subtask stats
+    const subtaskStats = await getSubtaskStats(taskId);
+    
+    // Get current task data
+    const allTasks = queryClient.getQueryData(['tasks']) as ITask[] | undefined;
+    const currentTask = allTasks?.find((task: ITask) => task._id === taskId);
+    
+    if (!currentTask) return;
+    
+    const shouldBeCompleted = subtaskStats.total > 0 && subtaskStats.completed === subtaskStats.total;
+    const shouldBeIncomplete = subtaskStats.total > 0 && subtaskStats.completed < subtaskStats.total;
+    
+    // Only update if the task completion status needs to change
+    if (shouldBeCompleted && !currentTask.completed) {
+      // Auto-complete the task
+      console.log('🎯 Auto-completing task due to all subtasks completed');
+      await taskAPI.toggleTaskCompletion(taskId, true);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    } else if (shouldBeIncomplete && currentTask.completed) {
+      // Auto-mark as incomplete due to incomplete subtasks
+      console.log('🎯 Auto-marking task as incomplete due to incomplete subtasks');
+      await taskAPI.toggleTaskCompletion(taskId, false);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    }
+  } catch (error) {
+    console.error('Error in auto task completion management:', error);
+  }
 };
 
 // Get subtasks for a task
@@ -63,10 +97,13 @@ export const useCreateSubtask = () => {
   return useMutation({
     mutationFn: ({ taskId, payload }: { taskId: string; payload: ICreateSubtaskPayload }) =>
       createSubtask(taskId, payload),
-    onSuccess: (_, { taskId }) => {
+    onSuccess: async (_, { taskId }) => {
       // Invalidate and refetch subtasks for this task
       queryClient.invalidateQueries({ queryKey: subtaskKeys.byTask(taskId) });
       queryClient.invalidateQueries({ queryKey: subtaskKeys.stats(taskId) });
+      
+      // Auto-manage task completion (mark as incomplete when new subtask is added)
+      await autoManageTaskCompletion(taskId, queryClient);
     },
   });
 };
@@ -151,7 +188,7 @@ export const useToggleSubtask = () => {
       
       return {};
     },
-    onSuccess: (updatedSubtask, _, context) => {
+    onSuccess: async (updatedSubtask, _, context) => {
       console.log('✅ Toggle mutation successful:', updatedSubtask);
       
       if (context?.taskId) {
@@ -172,6 +209,9 @@ export const useToggleSubtask = () => {
         queryClient.invalidateQueries({ 
           queryKey: subtaskKeys.stats(context.taskId) 
         });
+        
+        // Auto-manage task completion when subtask status changes
+        await autoManageTaskCompletion(context.taskId, queryClient);
       }
     },
     onError: (error, _, context) => {
@@ -197,13 +237,16 @@ export const useDeleteSubtask = () => {
     mutationFn: ({ subtaskId }: { subtaskId: string; taskId: string }) => {
       return deleteSubtask(subtaskId);
     },
-    onSuccess: (_, { subtaskId, taskId }) => {
+    onSuccess: async (_, { subtaskId, taskId }) => {
       // Remove the subtask from cache
       queryClient.removeQueries({ queryKey: subtaskKeys.byId(subtaskId) });
       
       // Invalidate subtasks list for the task
       queryClient.invalidateQueries({ queryKey: subtaskKeys.byTask(taskId) });
       queryClient.invalidateQueries({ queryKey: subtaskKeys.stats(taskId) });
+      
+      // Auto-manage task completion when subtask is deleted
+      await autoManageTaskCompletion(taskId, queryClient);
     },
   });
 };

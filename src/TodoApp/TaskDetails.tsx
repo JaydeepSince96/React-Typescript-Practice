@@ -197,8 +197,16 @@ const TaskDetails: React.FC = () => {
             isDark ? "text-white" : "text-gray-900"
           }`}
         >
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-sky-400 border-t-transparent mx-auto mb-4"></div>
-          Loading task...
+          <div className={`animate-spin rounded-full h-12 w-12 border-4 mx-auto mb-4 ${
+            isDark 
+              ? "border-gray-600 border-t-sky-400" 
+              : "border-gray-200 border-t-sky-600"
+          }`}></div>
+          <p className={`text-lg font-medium ${
+            isDark ? "text-white" : "text-gray-900"
+          }`}>
+            Loading task...
+          </p>
         </div>
       </SidebarLayout>
     );

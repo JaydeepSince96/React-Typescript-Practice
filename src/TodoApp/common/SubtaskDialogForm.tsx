@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useSubtaskForm } from "@/hooks/useSubtaskForm";
+import { useTheme } from "@/contexts/ThemeContext";
 import type { ISubtask } from "@/api/types";
 
 type SubtaskDialogFormProps = {
@@ -32,6 +33,7 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
   onSuccess,
   onCancel,
 }) => {
+  const { isDark } = useTheme();
   const {
     form,
     onSubmit,
@@ -55,9 +57,15 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
   }, [resetForm, onCancel]);
 
   return (
-    <DialogContent className="bg-neutral-800 text-white rounded-lg shadow-xl border border-neutral-700">
+    <DialogContent className={`rounded-lg shadow-xl border ${
+      isDark 
+        ? 'bg-neutral-800 text-white border-neutral-700' 
+        : 'bg-white text-gray-900 border-gray-200'
+    }`}>
       <DialogHeader>
-        <DialogTitle className="text-2xl font-semibold text-sky-400">
+        <DialogTitle className={`text-2xl font-semibold ${
+          isDark ? 'text-sky-400' : 'text-sky-600'
+        }`}>
           {title}
         </DialogTitle>
       </DialogHeader>
@@ -68,7 +76,9 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
             name="task"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-neutral-300 text-base">
+                <FormLabel className={`text-base ${
+                  isDark ? 'text-neutral-300' : 'text-gray-700'
+                }`}>
                   Subtask Description
                 </FormLabel>
                 <FormControl>
@@ -77,10 +87,16 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
                     {...field} 
                     rows={5}
                     disabled={isLoading}
-                    className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                    className={`border focus:border-sky-500 ${
+                      isDark 
+                        ? 'bg-neutral-700 border-neutral-600 text-white' 
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   />
                 </FormControl>
-                <FormMessage className="text-red-400 text-sm" />
+                <FormMessage className={`text-sm ${
+                  isDark ? 'text-red-400' : 'text-red-600'
+                }`} />
               </FormItem>
             )}
           />
@@ -91,7 +107,9 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
               name="startDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-neutral-300 text-base mb-2">
+                  <FormLabel className={`text-base mb-2 ${
+                    isDark ? 'text-neutral-300' : 'text-gray-700'
+                  }`}>
                     Start Date
                   </FormLabel>
                   <FormControl>
@@ -100,10 +118,16 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
                       value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
                       onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
                       disabled={isLoading}
-                      className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                      className={`border focus:border-sky-500 ${
+                        isDark 
+                          ? 'bg-neutral-700 border-neutral-600 text-white' 
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-400 text-sm mt-1" />
+                  <FormMessage className={`text-sm mt-1 ${
+                    isDark ? 'text-red-400' : 'text-red-600'
+                  }`} />
                 </FormItem>
               )}
             />
@@ -112,7 +136,9 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
               name="endDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-neutral-300 text-base mb-2">
+                  <FormLabel className={`text-base mb-2 ${
+                    isDark ? 'text-neutral-300' : 'text-gray-700'
+                  }`}>
                     End Date
                   </FormLabel>
                   <FormControl>
@@ -122,10 +148,16 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
                       onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
                       disabled={isLoading}
                       min={form.watch("startDate") ? new Date(form.watch("startDate")!).toISOString().split('T')[0] : undefined}
-                      className="bg-neutral-700 border-neutral-600 text-white focus:border-sky-500"
+                      className={`border focus:border-sky-500 ${
+                        isDark 
+                          ? 'bg-neutral-700 border-neutral-600 text-white' 
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-400 text-sm mt-1" />
+                  <FormMessage className={`text-sm mt-1 ${
+                    isDark ? 'text-red-400' : 'text-red-600'
+                  }`} />
                 </FormItem>
               )}
             />
@@ -137,14 +169,22 @@ const SubtaskDialogForm = memo<SubtaskDialogFormProps>(({
               variant="outline"
               onClick={handleCancel}
               disabled={isLoading}
-              className="bg-transparent border border-neutral-600 text-white hover:bg-neutral-700 hover:text-white disabled:opacity-50"
+              className={`border font-medium disabled:opacity-50 ${
+                isDark 
+                  ? 'bg-transparent border-neutral-600 text-white hover:bg-neutral-700 hover:text-white' 
+                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              }`}
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-md disabled:opacity-50"
+              className={`font-semibold shadow-md disabled:opacity-50 ${
+                isDark 
+                  ? 'bg-sky-500 hover:bg-sky-600 text-white' 
+                  : 'bg-sky-600 hover:bg-sky-700 text-white'
+              }`}
             >
               {buttonText}
             </Button>

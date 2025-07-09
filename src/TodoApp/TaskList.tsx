@@ -3,6 +3,8 @@ import TaskCard from "./common/TaskCard";
 import { TbListSearch } from "react-icons/tb";
 import type { ITask, TaskLabel } from "@/api/types";
 import { useToggleTaskCompletion, useUpdateTaskLabel } from "@/hooks/useApiHooks";
+import { getSubtaskStats } from "@/api/subtask/subtask-api";
+import { toast } from "sonner";
 
 interface TaskListProps {
   tasks: ITask[];
@@ -16,12 +18,45 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onEdit, onDelete }) => {
 
   const handleToggle = async (taskId: string, currentCompleted: boolean) => {
     try {
+      // If trying to mark task as complete, check if all subtasks are completed
+      if (!currentCompleted) { // !currentCompleted means we're trying to complete the task
+        try {
+          const subtaskStats = await getSubtaskStats(taskId);
+          
+          // If there are subtasks and not all are completed, prevent completion
+          if (subtaskStats.total > 0 && subtaskStats.completed < subtaskStats.total) {
+            toast.error(
+              `Cannot complete task!`,
+              {
+                description: `You must complete all ${subtaskStats.total} subtasks first. Currently ${subtaskStats.completed}/${subtaskStats.total} completed.`,
+                duration: 5000,
+              }
+            );
+            return; // Don't proceed with task completion
+          }
+        } catch (error) {
+          // If subtask stats fail to load, we'll allow the task to be completed
+          // This ensures the feature doesn't break if subtasks API is unavailable
+          console.warn('Could not load subtask stats, allowing task completion:', error);
+        }
+      }
+
       await toggleTaskMutation.mutateAsync({
         id: taskId,
         completed: !currentCompleted,
       });
+      
+      // Show success message
+      if (!currentCompleted) {
+        toast.success("Task completed! 🎉", {
+          description: "Great job completing all subtasks and the main task!",
+        });
+      }
     } catch (error) {
       console.error('Error toggling task:', error);
+      toast.error("Failed to update task", {
+        description: "Please try again later.",
+      });
     }
   };
 

@@ -335,13 +335,13 @@ function Tasks() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <button
                     onClick={handleAddNewTask}
-                    className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${
                       isDark 
                         ? 'bg-sky-600 hover:bg-sky-700 text-white' 
                         : 'bg-sky-600 hover:bg-sky-700 text-white'
                     }`}
                   >
-                    <FaPlus className="inline mr-3 text-lg" />
+                    <FaPlus className="inline mr-2" />
                     Create Your First Task
                   </button>
                   <div className={`text-sm ${
@@ -365,12 +365,7 @@ function Tasks() {
           <DialogTrigger asChild>
             <Button
               onClick={handleAddNewTask}
-              className={`fixed bottom-6 right-6 font-semibold py-3 px-6 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 z-50 ring-2 ring-offset-2 ${
-                isDark 
-                  ? 'bg-sky-600 hover:bg-sky-700 text-white ring-sky-400/20 ring-offset-neutral-900' 
-                  : 'bg-sky-600 hover:bg-sky-700 text-white ring-sky-400/30 ring-offset-white'
-              }`}
-              size="lg"
+              className="fixed bottom-6 right-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 z-40"
             >
               <FaPlus className="size-4" />
               Add New Task
@@ -454,13 +449,13 @@ const TasksWithLoadingAndError = withLoadingAndError<TasksProps>(Tasks, {
 });
 
 export default function TasksContainer() {
-  const { isLoading, error } = useGetAllTasks();
+  const { data: allTasks = [], isLoading, error } = useGetAllTasks();
   
   return (
     <TasksWithLoadingAndError
       isLoading={isLoading}
       error={error}
-      isEmpty={false} // Let the Tasks component handle its own empty state
+      isEmpty={allTasks.length === 0}
     />
   );
 }

@@ -6,9 +6,27 @@ import { formSchema } from '@/schema/TodoFormSchema';
 import { TaskLabel } from '@/api/types';
 import type { ITask } from '@/api/types';
 import { useCreateTask, useUpdateTask } from '@/hooks/useApiHooks';
-import { formatDateForAPI } from '@/utils/dateUtils';
+import { formatDateForAPI, parseDateFromAPI } from '@/utils/dateUtils';
 
 type FormData = z.infer<typeof formSchema>;
+
+// Helper function to safely parse dates from backend format
+const parseBackendDate = (dateString: string | undefined): Date | null => {
+  if (!dateString) return null;
+  
+  try {
+    // Try parsing as backend format first (DD-MM-YY, HH:MM)
+    if (dateString.includes('-') && dateString.includes(',')) {
+      return parseDateFromAPI(dateString);
+    }
+    // Fallback to regular Date parsing
+    const parsed = new Date(dateString);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  } catch (error) {
+    console.error('Error parsing date:', dateString, error);
+    return null;
+  }
+};
 
 interface UseTaskFormOptions {
   editTask?: ITask | null;
@@ -25,8 +43,8 @@ export function useTaskForm(options: UseTaskFormOptions = {}) {
   // Memoized default values to prevent unnecessary re-renders
   const defaultValues = useMemo(() => ({
     task: editTask?.title || "",
-    startDate: editTask?.startDate ? new Date(editTask.startDate) : null,
-    endDate: editTask?.dueDate ? new Date(editTask.dueDate) : null,
+    startDate: parseBackendDate(editTask?.startDate),
+    endDate: parseBackendDate(editTask?.dueDate),
     priority: editTask?.label || TaskLabel.LOW_PRIORITY,
   }), [editTask]);
 
@@ -40,8 +58,8 @@ export function useTaskForm(options: UseTaskFormOptions = {}) {
     if (editTask) {
       form.reset({
         task: editTask.title || "",
-        startDate: editTask.startDate ? new Date(editTask.startDate) : null,
-        endDate: editTask.dueDate ? new Date(editTask.dueDate) : null,
+        startDate: parseBackendDate(editTask.startDate),
+        endDate: parseBackendDate(editTask.dueDate),
         priority: editTask.label || TaskLabel.LOW_PRIORITY,
       });
     } else {

@@ -65,8 +65,8 @@ class GlobalErrorBoundary extends Component<Props, State> {
 
       // Default fallback UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-900">
-          <div className="max-w-md w-full p-8 bg-neutral-800 rounded-lg border border-neutral-700 shadow-xl">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-900 transition-colors">
+          <div className="max-w-md w-full p-8 bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 shadow-xl transition-colors">
             <div className="text-center">
               {/* Error Icon */}
               <div className="mx-auto w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mb-6">
@@ -84,28 +84,28 @@ class GlobalErrorBoundary extends Component<Props, State> {
               </div>
 
               {/* Error Title */}
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">
                 Oops! Something went wrong
               </h1>
 
               {/* Error Description */}
-              <p className="text-neutral-400 mb-6">
+              <p className="text-gray-600 dark:text-neutral-400 mb-6 transition-colors">
                 We encountered an unexpected error. Don't worry, our team has been notified.
               </p>
 
               {/* Error Details (Development mode) */}
               {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="mb-6 p-4 bg-neutral-900 rounded border border-neutral-600 text-left">
-                  <h3 className="text-red-400 font-semibold mb-2 text-sm">Error Details:</h3>
-                  <pre className="text-xs text-red-300 overflow-auto max-h-32">
+                <div className="mb-6 p-4 bg-gray-100 dark:bg-neutral-900 rounded border border-gray-300 dark:border-neutral-600 text-left transition-colors">
+                  <h3 className="text-red-600 dark:text-red-400 font-semibold mb-2 text-sm">Error Details:</h3>
+                  <pre className="text-xs text-red-700 dark:text-red-300 overflow-auto max-h-32">
                     {this.state.error.message}
                   </pre>
                   {this.state.errorInfo && (
                     <details className="mt-2">
-                      <summary className="text-xs text-neutral-400 cursor-pointer">
+                      <summary className="text-xs text-gray-600 dark:text-neutral-400 cursor-pointer">
                         Stack Trace
                       </summary>
-                      <pre className="text-xs text-neutral-500 mt-2 overflow-auto max-h-32">
+                      <pre className="text-xs text-gray-500 dark:text-neutral-500 mt-2 overflow-auto max-h-32">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -118,24 +118,24 @@ class GlobalErrorBoundary extends Component<Props, State> {
                 <Button
                   onClick={this.handleReset}
                   variant="outline"
-                  className="flex-1 bg-transparent border-neutral-600 text-white hover:bg-neutral-700"
+                  className="flex-1 bg-transparent border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
                 >
                   Try Again
                 </Button>
                 <Button
                   onClick={this.handleReload}
-                  className="flex-1 bg-sky-600 hover:bg-sky-700 text-white"
+                  className="flex-1 bg-blue-600 dark:bg-sky-600 hover:bg-blue-700 dark:hover:bg-sky-700 text-white transition-colors"
                 >
                   Reload Page
                 </Button>
               </div>
 
               {/* Support Contact */}
-              <p className="text-xs text-neutral-500 mt-4">
+              <p className="text-xs text-gray-500 dark:text-neutral-500 mt-4 transition-colors">
                 If the problem persists, please{' '}
                 <a
                   href="mailto:support@example.com"
-                  className="text-sky-400 hover:text-sky-300 underline"
+                  className="text-blue-500 dark:text-sky-400 hover:text-blue-400 dark:hover:text-sky-300 underline transition-colors"
                 >
                   contact support
                 </a>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import { SidebarLayout } from "@/layout/SidebarLayout";
 import { TbListSearch } from "react-icons/tb";
+import { useTheme } from "@/contexts/ThemeContext";
 
 import {
   useGetAllTasks,
@@ -22,6 +23,7 @@ const Priority = memo(() => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const level = searchParams.get("level") || "All";
+  const { isDark } = useTheme();
 
   const [open, setOpen] = useState(false);
   const [editTask, setEditTask] = useState<ITask | null>(null);
@@ -123,27 +125,41 @@ const Priority = memo(() => {
 
   return (
     <SidebarLayout>
-      <div className="flex-1 h-full w-full p-6 bg-neutral-900 overflow-y-auto">
+      <div className={`flex-1 h-full w-full p-6 overflow-y-auto transition-colors ${
+        isDark ? 'bg-neutral-900' : 'bg-gray-50'
+      }`}>
         <div className="flex items-center mb-6">
           <Button
             variant={"ghost"}
             onClick={handleBackNavigation}
-            className="flex items-center gap-2 text-neutral-300 hover:text-sky-400 hover:bg-neutral-800 transition-colors px-3 py-2 rounded-md"
+            className={`flex items-center gap-2 transition-colors px-3 py-2 rounded-md ${
+              isDark 
+                ? 'text-neutral-300 hover:text-sky-400 hover:bg-neutral-800' 
+                : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
+            }`}
           >
             <IoArrowBack className="text-xl" />
             <span className="text-lg">Back</span>
           </Button>
-          <h2 className="text-3xl font-bold ml-4 text-white">
+          <h2 className={`text-3xl font-bold ml-4 transition-colors ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
             Tasks with Priority:{" "}
-            <span className="capitalize text-sky-400">{level}</span>
+            <span className={`capitalize ${
+              isDark ? 'text-sky-400' : 'text-blue-600'
+            }`}>{level}</span>
           </h2>
         </div>
 
         <div className="space-y-4 p-4">
           {filteredTasks.length === 0 ? (
             <div className="text-center py-20 flex flex-col items-center justify-center">
-              <TbListSearch className="size-20 text-neutral-600 mb-4" />
-              <p className="text-neutral-400 text-xl font-semibold">
+              <TbListSearch className={`size-20 mb-4 transition-colors ${
+                isDark ? 'text-neutral-600' : 'text-gray-400'
+              }`} />
+              <p className={`text-xl font-semibold transition-colors ${
+                isDark ? 'text-neutral-400' : 'text-gray-600'
+              }`}>
                 No tasks found with "{level}" priority.
               </p>
             </div>

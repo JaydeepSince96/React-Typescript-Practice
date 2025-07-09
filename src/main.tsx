@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary.tsx";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -23,15 +24,17 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <GlobalErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <SidebarProvider>
-            <App />
-            <Toaster richColors position="top-right" />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </SidebarProvider>
-        </Provider>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <SidebarProvider>
+              <App />
+              <Toaster richColors position="top-right" theme="system" />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </SidebarProvider>
+          </Provider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </GlobalErrorBoundary>
   </StrictMode>
 );

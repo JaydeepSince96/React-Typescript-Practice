@@ -18,11 +18,25 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 // Create a provider component
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDark, setIsDark] = useState(false);
+  // Initialize theme from localStorage or default to light mode
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      return savedTheme === 'dark';
+    }
+    return false; // Default to light mode
+  });
 
   // Toggle the theme
   const toggleTheme = () => {
-    setIsDark(prevIsDark => !prevIsDark);
+    setIsDark(prevIsDark => {
+      const newTheme = !prevIsDark;
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      }
+      return newTheme;
+    });
   };
 
   // Add/remove 'dark' class from the body

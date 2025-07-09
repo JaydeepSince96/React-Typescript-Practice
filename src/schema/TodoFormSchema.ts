@@ -19,7 +19,10 @@ export const formSchema = z
   .refine(
     (data) => {
       if (data.startDate && data.endDate) {
-        return data.endDate >= data.startDate;
+        // Compare only the date part (ignore time) to allow same day dates
+        const startDateOnly = new Date(data.startDate.getFullYear(), data.startDate.getMonth(), data.startDate.getDate());
+        const endDateOnly = new Date(data.endDate.getFullYear(), data.endDate.getMonth(), data.endDate.getDate());
+        return endDateOnly >= startDateOnly;
       }
       return true;
     },

@@ -80,9 +80,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
       setIsAllTasksExpanded(true);
       navigate('/');
     }
-    if (isMobileOpen) {
-      setOpen(false);
-    }
+    // Removed automatic sidebar closing - let users close it manually
   };
 
   return (
@@ -116,9 +114,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                 className="cursor-pointer md:text-left"
                 onClick={() => {
                   navigate("/");
-                  if (isMobileOpen) {
-                    setOpen(false);
-                  }
+                  // Removed automatic sidebar closing - let users close it manually
                 }}
               >
                 TaskSync
@@ -188,9 +184,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                         }`}
                         onClick={() => {
                           navigate(section.path);
-                          if (isMobileOpen) {
-                            setOpen(false);
-                          }
+                          // Removed automatic sidebar closing - let users close it manually
                         }}
                       >
                         {getTaskSectionIcon(section.label)}
@@ -217,9 +211,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                     }`}
                     onClick={() => {
                       navigate(item.path);
-                      if (isMobileOpen) {
-                        setOpen(false);
-                      }
+                      // Removed automatic sidebar closing - let users close it manually
                     }}
                   >
                     {getSidebarIcon(item.label, false)}
@@ -260,9 +252,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                   }`}
                   onClick={() => {
                     navigate(item.path);
-                    if (isMobileOpen) {
-                      setOpen(false);
-                    }
+                    // Removed automatic sidebar closing - let users close it manually
                   }}
                   title={item.value}
                 >
@@ -309,9 +299,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
             }`}
             onClick={() => {
               navigate("/");
-              if (isMobileOpen) {
-                setOpen(false);
-              }
+              // Removed automatic sidebar closing - let users close it manually
             }}
           >
             Peak Productivity

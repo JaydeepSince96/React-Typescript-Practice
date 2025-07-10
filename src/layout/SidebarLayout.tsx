@@ -44,7 +44,7 @@ const getTaskSectionIcon = (label: string) => {
   switch (label) {
     case "Completed Tasks":
       return <MdOutlinePlaylistAddCheck className="size-4 text-green-500" />;
-    case "Pending Tasks":
+    case "Uncompleted Tasks":
       return <MdOutlinePendingActions className="size-4 text-orange-500" />;
     case "Overdue Tasks":
       return <MdOutlineTask className="size-4 text-red-500" />;

@@ -52,6 +52,30 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/completed",
+    element: (
+      <RouteWrapper fallbackMessage="Loading completed tasks...">
+        <Tasks />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/pending",
+    element: (
+      <RouteWrapper fallbackMessage="Loading pending tasks...">
+        <Tasks />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/overdue",
+    element: (
+      <RouteWrapper fallbackMessage="Loading overdue tasks...">
+        <Tasks />
+      </RouteWrapper>
+    ),
+  },
+  {
     path: "/test",
     element: <ErrorAndLoadingTest />,
   },

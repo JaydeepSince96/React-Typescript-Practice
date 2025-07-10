@@ -14,7 +14,7 @@ export const SidebarItems = [
 
 // Task sections for the collapsible "All Tasks" section
 export const TaskSections = [
-  { label: "Completed Tasks", value: "Completed Tasks", path: "/?filter=completed" },
-  { label: "Pending Tasks", value: "Pending Tasks", path: "/?filter=pending" },
-  { label: "Overdue Tasks", value: "Overdue Tasks", path: "/?filter=overdue" },
+  { label: "Completed Tasks", value: "Completed Tasks", path: "/completed" },
+  { label: "Uncompleted Tasks", value: "Uncompleted Tasks", path: "/pending" },
+  { label: "Overdue Tasks", value: "Overdue Tasks", path: "/overdue" },
 ];

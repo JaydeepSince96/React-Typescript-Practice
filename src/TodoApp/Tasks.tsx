@@ -4,7 +4,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import TaskDialogForm from "./common/TaskDialogForm";
 import { priorityLabels } from "@/const/const";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Pagination,
   PaginationContent,
@@ -45,14 +45,70 @@ function Tasks() {
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  // Handle route-based navigation (not URL parameters)
+  const routeFilter = useMemo(() => {
+    const path = location.pathname;
+    if (path === '/completed') return 'Completed';
+    if (path === '/pending') return 'Pending';
+    if (path === '/overdue') return 'Overdue';
+    return null;
+  }, [location.pathname]);
+
+  // Handle URL parameters for manual filtering only (not sidebar navigation)
+  useEffect(() => {
+    // Only process URL parameters if we're on the main route ("/")
+    if (location.pathname === '/') {
+      const urlParams = new URLSearchParams(location.search);
+      const filterParam = urlParams.get('filter');
+      
+      if (filterParam) {
+        console.log('🔗 URL filter detected:', filterParam);
+        setFilters(prev => ({
+          ...prev,
+          status: filterParam === 'completed' ? 'Completed' : 
+                  filterParam === 'uncompleted' ? 'Pending' : // uncompleted maps to pending in API
+                  filterParam === 'overdue' ? 'Overdue' :
+                  'All'
+        }));
+      } else {
+        // Reset status filter if no URL parameter
+        setFilters(prev => ({
+          ...prev,
+          status: 'All'
+        }));
+      }
+    } else {
+      // For non-main routes, reset filters to default
+      setFilters({
+        searchId: "",
+        priority: "All",
+        status: "All",
+        startDate: null,
+        endDate: null,
+      });
+    }
+  }, [location.search, location.pathname]);
+
   // Determine if we should use filtered API or all tasks API
+  // Route-based filtering (from sidebar) should not show "filtered results" indicator
   const hasActiveFilters = !!(
     filters.searchId ||
     (filters.priority && filters.priority !== 'All') ||
+    (location.pathname === '/' && filters.status && filters.status !== 'All') || // Only count manual status filters on main route
+    filters.startDate ||
+    filters.endDate
+  );
+
+  // Determine if we should use filtered API (includes both manual filters and route-based)
+  const shouldUseFilteredAPI = !!(
+    filters.searchId ||
+    (filters.priority && filters.priority !== 'All') ||
     (filters.status && filters.status !== 'All') ||
+    routeFilter || // Include route-based filtering for API calls
     filters.startDate ||
     filters.endDate
   );
@@ -62,7 +118,7 @@ function Tasks() {
     const converted = {
       searchId: filters.searchId || undefined,
       priority: filters.priority !== 'All' ? filters.priority : undefined,
-      status: filters.status !== 'All' ? filters.status : undefined,
+      status: routeFilter || (filters.status !== 'All' ? filters.status : undefined), // Use route filter or manual filter
       startDate: filters.startDate ? filters.startDate.toISOString().split('T')[0] : undefined,
       endDate: filters.endDate ? filters.endDate.toISOString().split('T')[0] : undefined,
       page: currentPage,
@@ -72,12 +128,14 @@ function Tasks() {
     // Debug logging
     console.log('🔍 Filter conversion:', {
       originalFilters: filters,
+      routeFilter,
       convertedFilters: converted,
-      hasActiveFilters
+      hasActiveFilters,
+      shouldUseFilteredAPI
     });
     
     return converted;
-  }, [filters, currentPage, itemsPerPage, hasActiveFilters]);
+  }, [filters, currentPage, itemsPerPage, hasActiveFilters, routeFilter, shouldUseFilteredAPI]);
 
   // API hooks
   const { data: allTasks = [], isLoading: allTasksLoading, error: allTasksError } = useGetAllTasks();
@@ -90,13 +148,14 @@ function Tasks() {
   const deleteTaskMutation = useDeleteTask();
 
   // Determine which data to use
-  const isLoading = hasActiveFilters ? filteredLoading : allTasksLoading;
-  const error = hasActiveFilters ? filteredError : allTasksError;
+  const isLoading = shouldUseFilteredAPI ? filteredLoading : allTasksLoading;
+  const error = shouldUseFilteredAPI ? filteredError : allTasksError;
   
   // Calculate tasks and pagination
   const { tasks, totalPages, totalCount } = useMemo(() => {
     console.log('📊 Data calculation:', {
       hasActiveFilters,
+      shouldUseFilteredAPI,
       filteredData: filteredData ? {
         tasksCount: filteredData.tasks.length,
         totalCount: filteredData.pagination.totalCount,
@@ -106,7 +165,7 @@ function Tasks() {
       currentPage
     });
 
-    if (hasActiveFilters && filteredData) {
+    if (shouldUseFilteredAPI && filteredData) {
       return {
         tasks: filteredData.tasks,
         totalPages: filteredData.pagination.totalPages,
@@ -125,7 +184,7 @@ function Tasks() {
         totalCount: allTasks.length,
       };
     }
-  }, [hasActiveFilters, filteredData, allTasks, currentPage, itemsPerPage]);
+  }, [hasActiveFilters, shouldUseFilteredAPI, filteredData, allTasks, currentPage, itemsPerPage]);
 
   // Reset to page 1 when filters change
   useEffect(() => {

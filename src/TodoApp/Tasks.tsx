@@ -52,9 +52,9 @@ function Tasks() {
   // Handle route-based navigation (not URL parameters)
   const routeFilter = useMemo(() => {
     const path = location.pathname;
-    if (path === '/completed') return 'Completed';
-    if (path === '/pending') return 'Pending';
-    if (path === '/overdue') return 'Overdue';
+    if (path === '/completed') return 'completed';
+    if (path === '/pending') return 'pending';
+    if (path === '/overdue') return 'overdue';
     return null;
   }, [location.pathname]);
 
@@ -115,10 +115,15 @@ function Tasks() {
 
   // Convert filters to API format
   const apiFilters = useMemo(() => {
+    // Convert route filter to API format (capitalize first letter)
+    const routeFilterForAPI = routeFilter ? 
+      routeFilter.charAt(0).toUpperCase() + routeFilter.slice(1) : 
+      undefined;
+    
     const converted = {
       searchId: filters.searchId || undefined,
       priority: filters.priority !== 'All' ? filters.priority : undefined,
-      status: routeFilter || (filters.status !== 'All' ? filters.status : undefined), // Use route filter or manual filter
+      status: routeFilterForAPI || (filters.status !== 'All' ? filters.status : undefined), // Use route filter or manual filter
       startDate: filters.startDate ? filters.startDate.toISOString().split('T')[0] : undefined,
       endDate: filters.endDate ? filters.endDate.toISOString().split('T')[0] : undefined,
       page: currentPage,
@@ -129,6 +134,7 @@ function Tasks() {
     console.log('🔍 Filter conversion:', {
       originalFilters: filters,
       routeFilter,
+      routeFilterForAPI,
       convertedFilters: converted,
       hasActiveFilters,
       shouldUseFilteredAPI
@@ -380,17 +386,23 @@ function Tasks() {
               <h3 className={`text-2xl font-bold mb-3 ${
                 isDark ? 'text-neutral-200' : 'text-gray-800'
               }`}>
-                {hasActiveFilters ? "No tasks match your filters" : "Welcome to TaskSync!"}
+                {routeFilter === 'completed' ? "No Completed Tasks" :
+                 routeFilter === 'pending' ? "No Pending Tasks" :
+                 routeFilter === 'overdue' ? "No Overdue Tasks" :
+                 hasActiveFilters ? "No tasks match your filters" : "Welcome to TaskSync!"}
               </h3>
               <p className={`text-lg mb-8 max-w-md mx-auto ${
                 isDark ? 'text-neutral-400' : 'text-gray-600'
               }`}>
-                {hasActiveFilters 
-                  ? "Try adjusting your filters or create a new task to get started."
-                  : "You don't have any tasks yet. Create your first task to begin organizing your work and boosting your productivity!"
+                {routeFilter === 'completed' ? "You haven't completed any tasks yet. Keep working on your tasks to see them here!" :
+                 routeFilter === 'pending' ? "Great! You don't have any pending tasks. All your tasks are either completed or scheduled for the future." :
+                 routeFilter === 'overdue' ? "Excellent! You don't have any overdue tasks. Keep up the good work with staying on top of your deadlines!" :
+                 hasActiveFilters 
+                   ? "Try adjusting your filters or create a new task to get started."
+                   : "You don't have any tasks yet. Create your first task to begin organizing your work and boosting your productivity!"
                 }
               </p>
-              {!hasActiveFilters && (
+              {!hasActiveFilters && !routeFilter && (
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <button
                     onClick={handleAddNewTask}

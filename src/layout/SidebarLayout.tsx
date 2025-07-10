@@ -1,11 +1,6 @@
 "use client";
 import { type ReactNode, useState, useEffect } from "react";
 import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarFooter,
-  SidebarInset,
   useSidebar, // 1. Import the useSidebar hook
 } from "@/components/ui/sidebar";
 import { SidebarItems, TaskSections } from "@/const/const";
@@ -91,9 +86,10 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className={`flex min-h-screen min-w-screen text-white overflow-hidden relative transition-colors duration-300 ${
+    <div className={`flex min-h-screen text-white overflow-hidden relative transition-colors duration-300 ${
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
+      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden transition-opacity duration-300"
@@ -101,21 +97,21 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
         ></div>
       )}
 
-      {/* 3. Update the Sidebar component props */}
-      <Sidebar
-        variant="sidebar"
-        collapsible="icon" // Use "icon" to make it shrink correctly
-        className={`border-r shadow-xl z-50 transition-all duration-300 ${
-          isDark
-            ? 'bg-neutral-800 border-neutral-700'
-            : 'bg-white border-gray-200'
-        }`} // Removed the w-16/w-64 classes
-      >
-        <SidebarHeader className={`${isCollapsed ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
+      {/* Sidebar - Hidden on mobile unless open */}
+      <div className={`
+        ${isMobileOpen ? 'fixed' : 'hidden'} md:block
+        ${isMobileOpen ? 'inset-y-0 left-0 z-50' : ''}
+        ${isDark ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}
+        border-r shadow-xl transition-all duration-300
+        ${isCollapsed ? 'w-16' : 'w-64'}
+        ${isMobileOpen ? 'w-64' : ''}
+      `}>
+        {/* Sidebar Header */}
+        <div className={`${isCollapsed && !isMobileOpen ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
           isDark ? 'bg-neutral-800 text-sky-400' : 'bg-white text-blue-600'
         }`}>
           <div className="flex items-center justify-between">
-            {!isCollapsed && (
+            {(!isCollapsed || isMobileOpen) && (
               <div
                 className="cursor-pointer md:text-left"
                 onClick={() => {
@@ -129,14 +125,15 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               </div>
             )}
             <div className="flex items-center gap-2">
-              {!isCollapsed && (
-                <div className="ml-4">
+              {(!isCollapsed || isMobileOpen) && (
+                <div className={`${isMobileOpen ? '' : 'ml-4'}`}>
                   <ThemeToggle />
                 </div>
               )}
+              {/* Desktop toggle button - hidden on mobile */}
               <button
-                onClick={toggleSidebar} // Use the function from the context
-                className={`p-2 rounded-lg transition-colors duration-200 ${
+                onClick={toggleSidebar}
+                className={`hidden md:block p-2 rounded-lg transition-colors duration-200 ${
                   isDark ? 'hover:bg-neutral-700 text-sky-400' : 'hover:bg-gray-100 text-blue-600'
                 }`}
                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -145,12 +142,13 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               </button>
             </div>
           </div>
-        </SidebarHeader>
+        </div>
 
-        <SidebarContent className={`flex-grow py-4 transition-colors duration-300 ${
+        {/* Sidebar Content */}
+        <div className={`flex-grow py-4 transition-colors duration-300 ${
           isDark ? 'bg-neutral-800' : 'bg-white'
-        }`}>
-          {!isCollapsed ? (
+        } overflow-y-auto`}>
+          {(!isCollapsed || isMobileOpen) ? (
             <div className="flex flex-col gap-2 p-2">
               {/* All Tasks Section - Collapsible */}
               <div>
@@ -231,7 +229,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
           ) : (
-            // Collapsed state - show only icons
+            // Collapsed state - show only icons (desktop only)
             <div className="flex flex-col gap-2 p-2 items-center">
               <div
                 className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
@@ -273,19 +271,23 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               ))}
             </div>
           )}
-        </SidebarContent>
+        </div>
 
-        <SidebarFooter className={`${isCollapsed ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
+        {/* Sidebar Footer */}
+        <div className={`${isCollapsed && !isMobileOpen ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
           isDark
             ? 'bg-neutral-800 text-neutral-400 border-neutral-700'
             : 'bg-white text-gray-500 border-gray-200'
         }`}>
-          {!isCollapsed && "Copyright PK @2025"}
-        </SidebarFooter>
-      </Sidebar>
+          {(!isCollapsed || isMobileOpen) && "Copyright PK @2025"}
+        </div>
+      </div>
 
-      {/* The main content area will now adjust automatically */}
-      <SidebarInset className="flex-1 flex flex-col">
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        isCollapsed && !isMobileOpen ? 'md:ml-16' : 'md:ml-64'
+      } ml-0`}>
+        {/* Mobile Header */}
         <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
           isDark
             ? 'bg-neutral-800 border-neutral-700'
@@ -319,12 +321,13 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
 
+        {/* Main Content */}
         <main className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
           isDark ? 'bg-neutral-900' : 'bg-gray-50'
         }`}>
           {children}
         </main>
-      </SidebarInset>
+      </div>
     </div>
   );
 };

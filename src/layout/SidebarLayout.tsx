@@ -2,12 +2,11 @@
 import { type ReactNode, useState, useEffect } from "react";
 import {
   Sidebar,
-  SidebarProvider,
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
   SidebarInset,
-  useSidebar,
+  useSidebar, // 1. Import the useSidebar hook
 } from "@/components/ui/sidebar";
 import { SidebarItems, TaskSections } from "@/const/const";
 import { FaBars } from "react-icons/fa6";
@@ -29,7 +28,7 @@ import ThemeToggle from "@/components/ui/theme-toggle";
 
 // Helper to get icons for sidebar items
 const getSidebarIcon = (label: string, isCollapsed = false) => {
-  const iconSize = isCollapsed ? "size-5" : "size-5"; // Keep icons same size
+  const iconSize = isCollapsed ? "size-5" : "size-5";
   switch (label) {
     case "Productivity Report":
       return <MdOutlineReport className={iconSize} />;
@@ -57,12 +56,13 @@ const getTaskSectionIcon = (label: string) => {
 };
 
 export const SidebarLayout = ({ children }: { children: ReactNode }) => {
-  const { open, setOpen } = useSidebar();
-  const isMobileOpen = open ?? false;
+  // 2. Get state and toggle function from the context instead of local state
+  const { state, toggleSidebar, open: isMobileOpen, setOpen } = useSidebar();
+  const isCollapsed = state === 'collapsed';
+
   const { isDark } = useTheme();
   const navigate = useNavigate();
-  
-  // State for collapsible "All Tasks" section with persistence
+
   const [isAllTasksExpanded, setIsAllTasksExpanded] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('allTasksExpanded');
@@ -71,10 +71,6 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
     return false;
   });
 
-  // State for sidebar collapse
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Persist state changes to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('allTasksExpanded', isAllTasksExpanded.toString());
@@ -83,200 +79,140 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
 
   const handleAllTasksClick = () => {
     const isHomePage = location.pathname === '/';
-    
     if (isHomePage) {
-      // If already on home page, just toggle expansion
       setIsAllTasksExpanded(!isAllTasksExpanded);
     } else {
-      // If on another page, navigate to home and expand
       setIsAllTasksExpanded(true);
       navigate('/');
     }
-    
-    // Close mobile sidebar
     if (isMobileOpen) {
       setOpen(false);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   return (
-    <SidebarProvider>
-      <div className={`flex min-h-screen min-w-screen text-white overflow-hidden relative transition-colors duration-300 ${
+    <div className={`flex min-h-screen min-w-screen text-white overflow-hidden relative transition-colors duration-300 ${
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
-        {/* Mobile Overlay */}
-        {isMobileOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden transition-opacity duration-300"
-            onClick={() => setOpen(false)}
-          ></div>
-        )}
-        
-        <Sidebar
-          variant="sidebar"
-          collapsible="offcanvas"
-          className={`border-r shadow-xl z-50 transition-all duration-300 ${
-            isDark 
-              ? 'bg-neutral-800 border-neutral-700' 
-              : 'bg-white border-gray-200'
-          } ${isCollapsed ? 'w-16' : 'w-64'}`}
-        >
-          <SidebarHeader className={`${isCollapsed ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
-            isDark 
-              ? 'bg-neutral-800 text-sky-400' 
-              : 'bg-white text-blue-600'
-          }`}>
-            <div className="flex items-center justify-between">
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden transition-opacity duration-300"
+          onClick={() => setOpen(false)}
+        ></div>
+      )}
+
+      {/* 3. Update the Sidebar component props */}
+      <Sidebar
+        variant="sidebar"
+        collapsible="icon" // Use "icon" to make it shrink correctly
+        className={`border-r shadow-xl z-50 transition-all duration-300 ${
+          isDark
+            ? 'bg-neutral-800 border-neutral-700'
+            : 'bg-white border-gray-200'
+        }`} // Removed the w-16/w-64 classes
+      >
+        <SidebarHeader className={`${isCollapsed ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
+          isDark ? 'bg-neutral-800 text-sky-400' : 'bg-white text-blue-600'
+        }`}>
+          <div className="flex items-center justify-between">
+            {!isCollapsed && (
+              <div
+                className="cursor-pointer md:text-left"
+                onClick={() => {
+                  navigate("/");
+                  if (isMobileOpen) {
+                    setOpen(false);
+                  }
+                }}
+              >
+                TaskSync
+              </div>
+            )}
+            <div className="flex items-center gap-2">
               {!isCollapsed && (
-                <div
-                  className="cursor-pointer md:text-left"
-                  onClick={() => {
-                    navigate("/");
-                    if (open) {
-                      setOpen(false);
-                    }
-                  }}
-                >
-                  TaskSync
+                <div className="ml-4">
+                  <ThemeToggle />
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                {!isCollapsed && (
-                  <div className="ml-4">
-                    <ThemeToggle />
-                  </div>
-                )}
-                <button
-                  onClick={toggleSidebar}
-                  className={`p-2 rounded-lg transition-colors duration-200 ${
-                    isDark 
-                      ? 'hover:bg-neutral-700 text-sky-400' 
-                      : 'hover:bg-gray-100 text-blue-600'
-                  }`}
-                  title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                  {isCollapsed ? <MdMenu className="size-5" /> : <MdClose className="size-5" />}
-                </button>
-              </div>
+              <button
+                onClick={toggleSidebar} // Use the function from the context
+                className={`p-2 rounded-lg transition-colors duration-200 ${
+                  isDark ? 'hover:bg-neutral-700 text-sky-400' : 'hover:bg-gray-100 text-blue-600'
+                }`}
+                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {isCollapsed ? <MdMenu className="size-5" /> : <MdClose className="size-5" />}
+              </button>
             </div>
-          </SidebarHeader>
+          </div>
+        </SidebarHeader>
 
-          <SidebarContent className={`flex-grow py-4 transition-colors duration-300 ${
-            isDark ? 'bg-neutral-800' : 'bg-white'
-          }`}>
-            {!isCollapsed ? (
-              <div className="flex flex-col gap-2 p-2">
-                {/* All Tasks Section - Collapsible */}
-                <div>
-                  <div
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200 ${
-                      window.location.pathname === "/" && !window.location.search
-                        ? isDark
-                          ? "bg-neutral-700 text-sky-400 font-semibold"
-                          : "bg-blue-50 text-blue-600 font-semibold"
-                        : isDark 
-                          ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400' 
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
-                    }`}
-                    onClick={handleAllTasksClick}
-                  >
-                    <MdOutlineTask className="size-5" />
-                    <span className="text-lg">All Tasks</span>
-                    {isAllTasksExpanded ? (
-                      <MdKeyboardArrowDown className="size-4 ml-auto" />
-                    ) : (
-                      <MdKeyboardArrowRight className="size-4 ml-auto" />
-                    )}
-                  </div>
-                  {isAllTasksExpanded && (
-                    <div className="pl-6 mt-2 space-y-1">
-                      {TaskSections.map((section) => (
-                        <div
-                          key={section.label}
-                          className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-                            window.location.pathname === section.path
-                              ? isDark
-                                ? "bg-neutral-700 text-sky-400 font-semibold"
-                                : "bg-blue-50 text-blue-600 font-semibold"
-                              : isDark
-                                ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
-                          }`}
-                          onClick={() => {
-                            navigate(section.path);
-                            if (isMobileOpen) {
-                              setOpen(false);
-                            }
-                          }}
-                        >
-                          {getTaskSectionIcon(section.label)}
-                          <span className="text-sm">{section.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Reports & Settings */}
-                <div className="mt-4">
-                  {SidebarItems.map((item) => (
-                    <div
-                      key={item.label}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200 ${
-                        window.location.pathname === item.path
-                          ? isDark
-                            ? "bg-neutral-700 text-sky-400 font-semibold"
-                            : "bg-blue-50 text-blue-600 font-semibold"
-                          : isDark
-                            ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
-                      }`}
-                      onClick={() => {
-                        navigate(item.path);
-                        if (isMobileOpen) {
-                          setOpen(false);
-                        }
-                      }}
-                    >
-                      {getSidebarIcon(item.label, false)}
-                      <span className="text-lg">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // Collapsed state - show only icons
-              <div className="flex flex-col gap-2 p-2 items-center">
-                {/* All Tasks Icon */}
+        <SidebarContent className={`flex-grow py-4 transition-colors duration-300 ${
+          isDark ? 'bg-neutral-800' : 'bg-white'
+        }`}>
+          {!isCollapsed ? (
+            <div className="flex flex-col gap-2 p-2">
+              {/* All Tasks Section - Collapsible */}
+              <div>
                 <div
-                  className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                     window.location.pathname === "/" && !window.location.search
                       ? isDark
-                        ? "bg-neutral-700 text-sky-400"
-                        : "bg-blue-50 text-blue-600"
-                      : isDark 
-                        ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400' 
+                        ? "bg-neutral-700 text-sky-400 font-semibold"
+                        : "bg-blue-50 text-blue-600 font-semibold"
+                      : isDark
+                        ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                   }`}
                   onClick={handleAllTasksClick}
-                  title="All Tasks"
                 >
                   <MdOutlineTask className="size-5" />
+                  <span className="text-lg">All Tasks</span>
+                  {isAllTasksExpanded ? (
+                    <MdKeyboardArrowDown className="size-4 ml-auto" />
+                  ) : (
+                    <MdKeyboardArrowRight className="size-4 ml-auto" />
+                  )}
                 </div>
+                {isAllTasksExpanded && (
+                  <div className="pl-6 mt-2 space-y-1">
+                    {TaskSections.map((section) => (
+                      <div
+                        key={section.label}
+                        className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                          window.location.pathname === section.path
+                            ? isDark
+                              ? "bg-neutral-700 text-sky-400 font-semibold"
+                              : "bg-blue-50 text-blue-600 font-semibold"
+                            : isDark
+                              ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+                        }`}
+                        onClick={() => {
+                          navigate(section.path);
+                          if (isMobileOpen) {
+                            setOpen(false);
+                          }
+                        }}
+                      >
+                        {getTaskSectionIcon(section.label)}
+                        <span className="text-sm">{section.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                {/* Reports & Settings Icons */}
+              {/* Reports & Settings */}
+              <div className="mt-4">
                 {SidebarItems.map((item) => (
                   <div
                     key={item.label}
-                    className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                       window.location.pathname === item.path
                         ? isDark
-                          ? "bg-neutral-700 text-sky-400"
-                          : "bg-blue-50 text-blue-600"
+                          ? "bg-neutral-700 text-sky-400 font-semibold"
+                          : "bg-blue-50 text-blue-600 font-semibold"
                         : isDark
                           ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
                           : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
@@ -287,66 +223,108 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                         setOpen(false);
                       }
                     }}
-                    title={item.value}
                   >
-                    {getSidebarIcon(item.label, true)}
+                    {getSidebarIcon(item.label, false)}
+                    <span className="text-lg">{item.value}</span>
                   </div>
                 ))}
               </div>
-            )}
-          </SidebarContent>
-
-          <SidebarFooter className={`${isCollapsed ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
-            isDark 
-              ? 'bg-neutral-800 text-neutral-400 border-neutral-700' 
-              : 'bg-white text-gray-500 border-gray-200'
-          }`}>
-            {!isCollapsed && "Copyright PK @2025"}
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset className="flex-1 flex flex-col">
-          {/* Mobile Sidebar Trigger (Hamburger Menu) */}
-          <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
-            isDark 
-              ? 'bg-neutral-800 border-neutral-700' 
-              : 'bg-white border-gray-200'
-          }`}>
-            <div 
-              onClick={() => setOpen(!open)}
-              className={`flex items-center gap-2 rounded-md p-2 shadow-sm transition-colors cursor-pointer ${
-                isDark 
-                  ? 'text-sky-400 bg-neutral-700 hover:bg-neutral-600'
-                  : 'text-blue-600 bg-gray-100 hover:bg-gray-200'
-              }`}
-            >
-              <FaBars className="text-xl" />
             </div>
-            <span
-              className={`text-xl font-bold cursor-pointer ${
-                isDark ? 'text-sky-400' : 'text-blue-600'
-              }`}
-              onClick={() => {
-                navigate("/");
-                if (open) {
-                  setOpen(false);
-                }
-              }}
-            >
-              Peak Productivity
-            </span>
-            <div>
-              <ThemeToggle />
+          ) : (
+            // Collapsed state - show only icons
+            <div className="flex flex-col gap-2 p-2 items-center">
+              <div
+                className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                  window.location.pathname === "/" && !window.location.search
+                    ? isDark
+                      ? "bg-neutral-700 text-sky-400"
+                      : "bg-blue-50 text-blue-600"
+                    : isDark
+                      ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                }`}
+                onClick={handleAllTasksClick}
+                title="All Tasks"
+              >
+                <MdOutlineTask className="size-5" />
+              </div>
+              {SidebarItems.map((item) => (
+                <div
+                  key={item.label}
+                  className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                    window.location.pathname === item.path
+                      ? isDark
+                        ? "bg-neutral-700 text-sky-400"
+                        : "bg-blue-50 text-blue-600"
+                      : isDark
+                        ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+                  }`}
+                  onClick={() => {
+                    navigate(item.path);
+                    if (isMobileOpen) {
+                      setOpen(false);
+                    }
+                  }}
+                  title={item.value}
+                >
+                  {getSidebarIcon(item.label, true)}
+                </div>
+              ))}
             </div>
+          )}
+        </SidebarContent>
+
+        <SidebarFooter className={`${isCollapsed ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
+          isDark
+            ? 'bg-neutral-800 text-neutral-400 border-neutral-700'
+            : 'bg-white text-gray-500 border-gray-200'
+        }`}>
+          {!isCollapsed && "Copyright PK @2025"}
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* The main content area will now adjust automatically */}
+      <SidebarInset className="flex-1 flex flex-col">
+        <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
+          isDark
+            ? 'bg-neutral-800 border-neutral-700'
+            : 'bg-white border-gray-200'
+        }`}>
+          <div
+            onClick={() => setOpen(!isMobileOpen)}
+            className={`flex items-center gap-2 rounded-md p-2 shadow-sm transition-colors cursor-pointer ${
+              isDark
+                ? 'text-sky-400 bg-neutral-700 hover:bg-neutral-600'
+                : 'text-blue-600 bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            <FaBars className="text-xl" />
           </div>
+          <span
+            className={`text-xl font-bold cursor-pointer ${
+              isDark ? 'text-sky-400' : 'text-blue-600'
+            }`}
+            onClick={() => {
+              navigate("/");
+              if (isMobileOpen) {
+                setOpen(false);
+              }
+            }}
+          >
+            Peak Productivity
+          </span>
+          <div>
+            <ThemeToggle />
+          </div>
+        </div>
 
-          <main className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
-            isDark ? 'bg-neutral-900' : 'bg-gray-50'
-          }`}>
-            {children}
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+        <main className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
+          isDark ? 'bg-neutral-900' : 'bg-gray-50'
+        }`}>
+          {children}
+        </main>
+      </SidebarInset>
+    </div>
   );
 };

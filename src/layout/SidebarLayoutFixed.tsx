@@ -304,7 +304,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
           </SidebarFooter>
         </Sidebar>
 
-        <SidebarInset className="flex-1 flex flex-col">
+        <SidebarInset className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
           {/* Mobile Sidebar Trigger (Hamburger Menu) */}
           <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
             isDark 

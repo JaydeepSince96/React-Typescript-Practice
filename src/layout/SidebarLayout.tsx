@@ -1,5 +1,5 @@
 "use client";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarProvider,
@@ -59,12 +59,22 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
   
-  // State for collapsible "All Tasks" section
-  const [isAllTasksExpanded, setIsAllTasksExpanded] = useState(false);
+  // State for collapsible "All Tasks" section with persistence
+  const [isAllTasksExpanded, setIsAllTasksExpanded] = useState(() => {
+    // Initialize from localStorage, default to false
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('allTasksExpanded');
+      return saved === 'true';
+    }
+    return false;
+  });
 
-  const toggleAllTasks = () => {
-    setIsAllTasksExpanded(!isAllTasksExpanded);
-  };
+  // Persist state changes to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('allTasksExpanded', isAllTasksExpanded.toString());
+    }
+  }, [isAllTasksExpanded]);
 
   return (
     <SidebarProvider>
@@ -119,11 +129,33 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               <div>
                 <div
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark 
-                      ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400' 
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                    window.location.pathname === "/" && !window.location.search
+                      ? isDark
+                        ? "bg-neutral-700 text-sky-400 font-semibold"
+                        : "bg-blue-50 text-blue-600 font-semibold"
+                      : isDark 
+                        ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400' 
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                   }`}
-                  onClick={toggleAllTasks}
+                  onClick={() => {
+                    const isCurrentlyOnHome = window.location.pathname === "/" && !window.location.search;
+                    
+                    if (isCurrentlyOnHome) {
+                      // If already on home page, just toggle expansion
+                      setIsAllTasksExpanded(!isAllTasksExpanded);
+                    } else {
+                      // If on another page, set to expanded first, then navigate after a brief delay
+                      setIsAllTasksExpanded(true);
+                      // Use requestAnimationFrame to ensure state update is processed
+                      requestAnimationFrame(() => {
+                        navigate("/");
+                      });
+                    }
+                    
+                    if (isMobileOpen) {
+                      setOpen(false);
+                    }
+                  }}
                 >
                   <MdOutlineTask className="size-5" />
                   <span className="text-lg flex-1">All Tasks</span>

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getTaskStats } from "@/api/stats/stats-api";
 import type { IStatsResponse } from "@/api/types";
+import type { StatsFilterOptions } from "@/api/stats/stats-api";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,10 +27,16 @@ import {
   IoWarningOutline,
   IoStatsChartOutline,
   IoTrendingUpOutline,
+  IoCalendarOutline,
+  IoFilterOutline,
+  IoRefreshOutline,
 } from "react-icons/io5";
 import { SidebarLayout } from "@/layout/SidebarLayout";
 import { TbListSearch } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 
@@ -110,33 +117,496 @@ const StatCard = ({
   </div>
 );
 
+// Professional Filter Panel Component
+const FilterPanel = ({
+  filters,
+  onFiltersChange,
+  onApplyFilters,
+  onClearFilters,
+  isLoading,
+  isDark,
+}: {
+  filters: StatsFilterOptions;
+  onFiltersChange: (newFilters: StatsFilterOptions) => void;
+  onApplyFilters: () => void;
+  onClearFilters: () => void;
+  isLoading: boolean;
+  isDark: boolean;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  
+  const getWeekNumber = (date: Date) => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  };
+  
+  const currentWeek = getWeekNumber(new Date());
+
+  // Check if filters are applied (different from default)
+  const isFiltersApplied = () => {
+    const defaultFilters = {
+      period: 'month',
+      year: currentYear,
+      month: currentMonth,
+    };
+    
+    return (
+      filters.period !== defaultFilters.period ||
+      filters.year !== defaultFilters.year ||
+      filters.month !== defaultFilters.month ||
+      filters.week !== undefined ||
+      filters.startDate !== undefined ||
+      filters.endDate !== undefined
+    );
+  };
+
+  const handlePeriodChange = (period: 'week' | 'month' | 'year' | 'custom') => {
+    const newFilters: StatsFilterOptions = { period };
+    
+    // Set default values based on period
+    if (period === 'week') {
+      newFilters.year = currentYear;
+      newFilters.week = currentWeek;
+    } else if (period === 'month') {
+      newFilters.year = currentYear;
+      newFilters.month = currentMonth;
+    } else if (period === 'year') {
+      newFilters.year = currentYear;
+    } else if (period === 'custom') {
+      // Set default to current month for custom range
+      const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
+      const endOfMonth = new Date(currentYear, currentMonth, 0);
+      newFilters.startDate = startOfMonth.toISOString().split('T')[0];
+      newFilters.endDate = endOfMonth.toISOString().split('T')[0];
+    }
+    
+    onFiltersChange(newFilters);
+  };
+
+  // Quick date range handlers
+  const handleQuickRange = (days: number) => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - days + 1);
+    
+    onFiltersChange({
+      period: 'custom',
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
+    });
+  };
+
+  return (
+    <div className={cn(
+      "rounded-xl shadow-xl border mb-8 transition-all duration-300",
+      isDark 
+        ? "bg-gradient-to-br from-neutral-800 to-neutral-900 border-neutral-700" 
+        : "bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm"
+    )}>
+      {/* Filter Header with Toggle */}
+      <div 
+        className={cn(
+          "flex items-center justify-between p-6 cursor-pointer",
+          isDark ? "hover:bg-neutral-800/50" : "hover:bg-gray-50"
+        )}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            isDark ? "bg-neutral-700/50" : "bg-gray-100"
+          )}>
+            <IoFilterOutline className="text-xl text-sky-400" />
+          </div>
+          <h3 className={cn(
+            "text-lg font-semibold",
+            isDark ? "text-white" : "text-gray-900"
+          )}>
+            Productivity Filters
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Clear Filters Label - Only show when filters are applied */}
+          {isFiltersApplied() && (
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                onClearFilters();
+              }}
+              className={cn(
+                "text-sm cursor-pointer underline transition-colors duration-200",
+                isDark 
+                  ? "text-sky-400 hover:text-sky-300" 
+                  : "text-blue-600 hover:text-blue-700"
+              )}
+            >
+              Clear
+            </span>
+          )}
+          {/* Toggle Icon */}
+          <div className={cn(
+            "p-1 rounded transition-transform duration-200",
+            isExpanded ? "rotate-180" : "rotate-0"
+          )}>
+            <IoArrowDownCircleOutline className={cn(
+              "text-xl",
+              isDark ? "text-neutral-400" : "text-gray-500"
+            )} />
+          </div>
+        </div>
+      </div>
+
+      {/* Collapsible Filter Content */}
+      <div className={cn(
+        "overflow-hidden transition-all duration-300",
+        isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+      )}>
+        <div className="px-6 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            {/* Period Selection */}
+            <div className="space-y-2 col-span-2">
+              <Label className={cn(
+                "text-sm font-medium",
+                isDark ? "text-neutral-300" : "text-gray-700"
+              )}>
+                Time Period
+              </Label>
+              <Select value={filters.period || 'month'} onValueChange={handlePeriodChange}>
+                <SelectTrigger className={cn(
+                  "w-full h-9",
+                  isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                )}>
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                  <SelectItem value="custom">Custom Date Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Conditional inputs based on period */}
+            {filters.period === 'week' && (
+              <>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    Year
+                  </Label>
+                  <Input
+                    type="number"
+                    value={filters.year || currentYear}
+                    onChange={(e) => onFiltersChange({ ...filters, year: parseInt(e.target.value) })}
+                    min="2020"
+                    max="2030"
+                    className={cn(
+                      "h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    Week Number
+                  </Label>
+                  <Input
+                    type="number"
+                    value={filters.week || currentWeek}
+                    onChange={(e) => onFiltersChange({ ...filters, week: parseInt(e.target.value) })}
+                    min="1"
+                    max="53"
+                    className={cn(
+                      "h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}
+                  />
+                </div>
+              </>
+            )}
+
+            {filters.period === 'month' && (
+              <>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    Year
+                  </Label>
+                  <Input
+                    type="number"
+                    value={filters.year || currentYear}
+                    onChange={(e) => onFiltersChange({ ...filters, year: parseInt(e.target.value) })}
+                    min="2020"
+                    max="2030"
+                    className={cn(
+                      "h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    Month
+                  </Label>
+                  <Select 
+                    value={filters.month?.toString() || currentMonth.toString()} 
+                    onValueChange={(value) => onFiltersChange({ ...filters, month: parseInt(value) })}
+                  >
+                    <SelectTrigger className={cn(
+                      "w-full h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                        <SelectItem key={month} value={month.toString()}>
+                          {new Date(2024, month - 1, 1).toLocaleString('default', { month: 'long' })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {filters.period === 'year' && (
+              <div className="space-y-2">
+                <Label className={cn(
+                  "text-sm font-medium",
+                  isDark ? "text-neutral-300" : "text-gray-700"
+                )}>
+                  Year
+                </Label>
+                <Input
+                  type="number"
+                  value={filters.year || currentYear}
+                  onChange={(e) => onFiltersChange({ ...filters, year: parseInt(e.target.value) })}
+                  min="2020"
+                  max="2030"
+                  className={cn(
+                    "h-9",
+                    isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                  )}
+                />
+              </div>
+            )}
+
+            {filters.period === 'custom' && (
+              <>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    Start Date
+                  </Label>
+                  <Input
+                    type="date"
+                    value={filters.startDate || ''}
+                    onChange={(e) => onFiltersChange({ ...filters, startDate: e.target.value })}
+                    className={cn(
+                      "h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className={cn(
+                    "text-sm font-medium",
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  )}>
+                    End Date
+                  </Label>
+                  <Input
+                    type="date"
+                    value={filters.endDate || ''}
+                    onChange={(e) => onFiltersChange({ ...filters, endDate: e.target.value })}
+                    className={cn(
+                      "h-9",
+                      isDark ? "border-neutral-600 bg-neutral-800/50" : "border-gray-300"
+                    )}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Apply Button */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium opacity-0">Apply</Label>
+              <Button
+                onClick={() => {
+                  onApplyFilters();
+                  setIsExpanded(false); // Collapse after applying
+                }}
+                disabled={isLoading}
+                className={cn(
+                  "w-full h-9 flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200",
+                  "bg-sky-500 hover:bg-sky-600 text-white shadow-lg hover:shadow-xl",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <IoRefreshOutline className="animate-spin text-sm" />
+                    Applying...
+                  </>
+                ) : (
+                  <>
+                    <IoCalendarOutline className="text-sm" />
+                    Apply Filters
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Quick Range Buttons for Custom Date Range */}
+          {filters.period === 'custom' && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickRange(7)}
+                  className={cn(
+                    "h-8 px-3 text-xs",
+                    isDark ? "border-neutral-600 bg-neutral-800/50 hover:bg-neutral-700" : "border-gray-300 hover:bg-gray-100"
+                  )}
+                >
+                  Last 7 days
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickRange(30)}
+                  className={cn(
+                    "h-8 px-3 text-xs",
+                    isDark ? "border-neutral-600 bg-neutral-800/50 hover:bg-neutral-700" : "border-gray-300 hover:bg-gray-100"
+                  )}
+                >
+                  Last 30 days
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickRange(90)}
+                  className={cn(
+                    "h-8 px-3 text-xs",
+                    isDark ? "border-neutral-600 bg-neutral-800/50 hover:bg-neutral-700" : "border-gray-300 hover:bg-gray-100"
+                  )}
+                >
+                  Last 90 days
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProductivityReports: React.FC = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
   const [statsData, setStatsData] = useState<IStatsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filter state
+  const [filters, setFilters] = useState<StatsFilterOptions>({
+    period: 'month',
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+  });
 
-  // Fetch stats data from API
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        console.log("Fetching stats...");
-        const stats = await getTaskStats();
-        console.log("Received stats:", stats);
-        setStatsData(stats);
-      } catch (err) {
-        console.error("Failed to fetch stats:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch stats");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
+  // Fetch stats data from API with filters
+  const fetchStats = useCallback(async (filterOptions?: StatsFilterOptions) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      console.log("Fetching stats with filters:", filterOptions);
+      const stats = await getTaskStats(filterOptions);
+      console.log("Received stats:", stats);
+      setStatsData(stats);
+    } catch (err) {
+      console.error("Failed to fetch stats:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch stats");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  // Initial fetch with default filters
+  useEffect(() => {
+    fetchStats(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  // Handle filter changes
+  const handleFiltersChange = (newFilters: StatsFilterOptions) => {
+    setFilters(newFilters);
+  };
+
+  // Apply filters (refetch data)
+  const handleApplyFilters = () => {
+    fetchStats(filters);
+  };
+
+  // Clear filters and reset to default
+  const handleClearFilters = () => {
+    const defaultFilters: StatsFilterOptions = {
+      period: 'month',
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+    };
+    setFilters(defaultFilters);
+    // Auto-apply the default filters when clearing
+    fetchStats(defaultFilters);
+  };
+
+  // Get period display text
+  const getPeriodDisplayText = () => {
+    if (!filters.period) return "Current Period";
+    
+    switch (filters.period) {
+      case 'week':
+        return `Week ${filters.week || 'Current'} of ${filters.year || new Date().getFullYear()}`;
+      case 'month': {
+        const monthName = filters.month 
+          ? new Date(2024, filters.month - 1, 1).toLocaleString('default', { month: 'long' })
+          : 'Current Month';
+        return `${monthName} ${filters.year || new Date().getFullYear()}`;
+      }
+      case 'year':
+        return `Year ${filters.year || new Date().getFullYear()}`;
+      case 'custom': {
+        if (filters.startDate && filters.endDate) {
+          const start = new Date(filters.startDate).toLocaleDateString();
+          const end = new Date(filters.endDate).toLocaleDateString();
+          return `${start} - ${end}`;
+        }
+        return "Custom Range";
+      }
+      default:
+        return "Current Period";
+    }
+  };
 
   // Process data for charts
   const chartData = React.useMemo(() => {
@@ -327,44 +797,50 @@ const ProductivityReports: React.FC = () => {
         isDark ? "bg-neutral-900 text-white" : "bg-gray-50 text-gray-900"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(-1)}
               className={cn(
-                "transition-colors",
+                "flex items-center gap-2 transition-all duration-200",
                 isDark 
-                  ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
-                  : "hover:bg-gray-100 text-gray-600 hover:text-gray-800"
+                  ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800/50" 
+                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-100"
               )}
             >
-              <IoArrowBack className="text-xl" />
+              <IoArrowBack />
+              Back
             </Button>
             <div>
               <h1 className={cn(
-                "text-4xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-                isDark ? "from-sky-400 to-blue-500" : "from-blue-600 to-indigo-600"
+                "text-3xl font-bold flex items-center gap-3",
+                isDark ? "text-white" : "text-gray-900"
               )}>
-                Productivity Dashboard
+                <IoStatsChartOutline className="text-sky-400" />
+                Productivity Reports
               </h1>
               <p className={cn(
-                "mt-2",
+                "text-sm mt-1 flex items-center gap-2",
                 isDark ? "text-neutral-400" : "text-gray-600"
               )}>
-                Comprehensive insights into your task management and productivity metrics
+                <IoCalendarOutline className="text-sky-400" />
+                {getPeriodDisplayText()}
               </p>
             </div>
           </div>
-          <div className={cn(
-            "flex items-center gap-2",
-            isDark ? "text-sky-400" : "text-blue-600"
-          )}>
-            <IoStatsChartOutline className="text-2xl" />
-            <span className="text-sm font-medium">Real-time Analytics</span>
-          </div>
         </div>
+
+        {/* Filter Panel */}
+        <FilterPanel
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          isLoading={isLoading}
+          isDark={isDark}
+        />
 
         {/* Loading State */}
         {isLoading && (

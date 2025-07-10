@@ -1,12 +1,36 @@
 import { API_ENDPOINTS, createAPIHeaders, handleAPIError } from '../config';
 import type { IStatsResponse, IAPIResponse } from '../types';
 
+// Interface for stats filter options
+export interface StatsFilterOptions {
+  period?: 'week' | 'month' | 'year' | 'custom';
+  startDate?: string;
+  endDate?: string;
+  year?: number;
+  month?: number;
+  week?: number;
+}
+
 // Stats API functions
 export const statsAPI = {
-  // Get task statistics
-  getTaskStats: async (): Promise<IStatsResponse> => {
+  // Get task statistics with optional filtering
+  getTaskStats: async (filters?: StatsFilterOptions): Promise<IStatsResponse> => {
     try {
-      const response = await fetch(API_ENDPOINTS.STATS, {
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      
+      const url = `${API_ENDPOINTS.STATS}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      console.log('Fetching stats with URL:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: createAPIHeaders(),
       });

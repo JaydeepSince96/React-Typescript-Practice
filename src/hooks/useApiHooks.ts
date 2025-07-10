@@ -118,7 +118,7 @@ export const useUpdateTaskDueDate = () => {
 export const useGetTaskStats = () => {
   return useQuery({
     queryKey: QUERY_KEYS.TASK_STATS,
-    queryFn: statsAPI.getTaskStats,
+    queryFn: () => statsAPI.getTaskStats(),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };

@@ -28,15 +28,14 @@ import { useTheme } from "@/contexts/ThemeContext";
 import ThemeToggle from "@/components/ui/theme-toggle";
 
 // Helper to get icons for sidebar items
-const getSidebarIcon = (label: string, isCollapsed = false) => {
-  const iconSize = isCollapsed ? "size-5" : "size-5"; // Keep icons same size
+const getSidebarIcon = (label: string) => {
   switch (label) {
     case "Productivity Report":
-      return <MdOutlineReport className={iconSize} />;
+      return <MdOutlineReport className="size-5" />;
     case "Tasks Reports":
-      return <MdOutlineDashboard className={iconSize} />;
+      return <MdOutlineDashboard className="size-5" />;
     case "Settings":
-      return <MdOutlineSettings className={iconSize} />;
+      return <MdOutlineSettings className="size-5" />;
     default:
       return null;
   }
@@ -125,7 +124,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               : 'bg-white border-gray-200'
           } ${isCollapsed ? 'w-16' : 'w-64'}`}
         >
-          <SidebarHeader className={`${isCollapsed ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
+          <SidebarHeader className={`p-5 text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
             isDark 
               ? 'bg-neutral-800 text-sky-400' 
               : 'bg-white text-blue-600'
@@ -242,7 +241,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                         }
                       }}
                     >
-                      {getSidebarIcon(item.label, false)}
+                      {getSidebarIcon(item.label)}
                       <span className="text-lg">{item.value}</span>
                     </div>
                   ))}
@@ -253,7 +252,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               <div className="flex flex-col gap-2 p-2 items-center">
                 {/* All Tasks Icon */}
                 <div
-                  className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                  className={`p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                     window.location.pathname === "/" && !window.location.search
                       ? isDark
                         ? "bg-neutral-700 text-sky-400"
@@ -272,7 +271,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                 {SidebarItems.map((item) => (
                   <div
                     key={item.label}
-                    className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                    className={`p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                       window.location.pathname === item.path
                         ? isDark
                           ? "bg-neutral-700 text-sky-400"
@@ -289,14 +288,14 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                     }}
                     title={item.value}
                   >
-                    {getSidebarIcon(item.label, true)}
+                    {getSidebarIcon(item.label)}
                   </div>
                 ))}
               </div>
             )}
           </SidebarContent>
 
-          <SidebarFooter className={`${isCollapsed ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
+          <SidebarFooter className={`p-4 text-sm border-t transition-colors duration-300 ${
             isDark 
               ? 'bg-neutral-800 text-neutral-400 border-neutral-700' 
               : 'bg-white text-gray-500 border-gray-200'

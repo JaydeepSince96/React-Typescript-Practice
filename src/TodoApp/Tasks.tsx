@@ -315,7 +315,7 @@ function Tasks() {
 
   return (
     <SidebarLayout>
-      <div className={`p-6 min-h-screen flex flex-col transition-colors duration-300 ${
+      <div className={`min-h-screen flex flex-col transition-colors duration-300 ${
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
         <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -373,7 +373,7 @@ function Tasks() {
           </div>
         )}
 
-        <main className="flex-1 flex flex-col p-4">
+        <main className="flex-1 flex flex-col">
           {tasks.length === 0 ? (
             <div className="text-center py-20">
               <div className={`rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6 ${

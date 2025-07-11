@@ -53,40 +53,42 @@ const getTaskSectionIcon = (label: string) => {
 export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   // 2. Get state and toggle function from the context instead of local state
   const { state, toggleSidebar, open: isMobileOpen, setOpen } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const isCollapsed = state === "collapsed";
 
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
   const [isAllTasksExpanded, setIsAllTasksExpanded] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('allTasksExpanded');
-      return saved === 'true';
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("allTasksExpanded");
+      return saved === "true";
     }
     return false;
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('allTasksExpanded', isAllTasksExpanded.toString());
+    if (typeof window !== "undefined") {
+      localStorage.setItem("allTasksExpanded", isAllTasksExpanded.toString());
     }
   }, [isAllTasksExpanded]);
 
   const handleAllTasksClick = () => {
-    const isHomePage = location.pathname === '/';
+    const isHomePage = location.pathname === "/";
     if (isHomePage) {
       setIsAllTasksExpanded(!isAllTasksExpanded);
     } else {
       setIsAllTasksExpanded(true);
-      navigate('/');
+      navigate("/");
     }
     // Removed automatic sidebar closing - let users close it manually
   };
 
   return (
-    <div className={`flex min-h-screen text-white overflow-hidden relative transition-colors duration-300 ${
-        isDark ? 'bg-neutral-900' : 'bg-gray-50'
-      }`}>
+    <div
+      className={`flex min-h-screen text-white overflow-hidden relative transition-colors duration-300 ${
+        isDark ? "bg-neutral-900" : "bg-gray-50"
+      }`}
+    >
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
@@ -96,18 +98,28 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
       )}
 
       {/* Sidebar - Hidden on mobile unless open */}
-      <div className={`
-        ${isMobileOpen ? 'fixed' : 'hidden'} md:block
-        ${isMobileOpen ? 'inset-y-0 left-0 z-50' : ''}
-        ${isDark ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}
+      <div
+        className={`
+        ${isMobileOpen ? "fixed" : "hidden"} md:block
+        ${isMobileOpen ? "inset-y-0 left-0 z-50" : ""}
+        ${
+          isDark
+            ? "bg-neutral-800 border-neutral-700"
+            : "bg-white border-gray-200"
+        }
         border-r shadow-xl transition-all duration-300
-        ${isCollapsed ? 'w-16' : 'w-64'}
-        ${isMobileOpen ? 'w-64' : ''}
-      `}>
+        ${isCollapsed ? "w-16" : "w-64"}
+        ${isMobileOpen ? "w-64" : ""}
+      `}
+      >
         {/* Sidebar Header */}
-        <div className={`${isCollapsed && !isMobileOpen ? 'p-2' : 'p-5'} text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
-          isDark ? 'bg-neutral-800 text-sky-400' : 'bg-white text-blue-600'
-        }`}>
+        <div
+          className={`${
+            isCollapsed && !isMobileOpen ? "p-2" : "p-5"
+          } text-2xl font-extrabold overflow-hidden whitespace-nowrap transition-all duration-300 ${
+            isDark ? "bg-neutral-800 text-sky-400" : "bg-white text-blue-600"
+          }`}
+        >
           <div className="flex items-center justify-between">
             {(!isCollapsed || isMobileOpen) && (
               <div
@@ -122,7 +134,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
             )}
             <div className="flex items-center gap-2">
               {(!isCollapsed || isMobileOpen) && (
-                <div className={`${isMobileOpen ? '' : 'ml-4'}`}>
+                <div className={`${isMobileOpen ? "" : "ml-4"}`}>
                   <ThemeToggle />
                 </div>
               )}
@@ -130,21 +142,29 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               <button
                 onClick={toggleSidebar}
                 className={`hidden md:block p-2 rounded-lg transition-colors duration-200 ${
-                  isDark ? 'hover:bg-neutral-700 text-sky-400' : 'hover:bg-gray-100 text-blue-600'
+                  isDark
+                    ? "hover:bg-neutral-700 text-sky-400"
+                    : "hover:bg-gray-100 text-blue-600"
                 }`}
                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {isCollapsed ? <MdMenu className="size-5" /> : <MdClose className="size-5" />}
+                {isCollapsed ? (
+                  <MdMenu className="size-5" />
+                ) : (
+                  <MdClose className="size-5" />
+                )}
               </button>
             </div>
           </div>
         </div>
 
         {/* Sidebar Content */}
-        <div className={`flex-grow py-4 transition-colors duration-300 ${
-          isDark ? 'bg-neutral-800' : 'bg-white'
-        } overflow-y-auto`}>
-          {(!isCollapsed || isMobileOpen) ? (
+        <div
+          className={`flex-grow py-4 transition-colors duration-300 ${
+            isDark ? "bg-neutral-800" : "bg-white"
+          } overflow-y-auto`}
+        >
+          {!isCollapsed || isMobileOpen ? (
             <div className="flex flex-col gap-2 p-2">
               {/* All Tasks Section - Collapsible */}
               <div>
@@ -155,8 +175,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                         ? "bg-neutral-700 text-sky-400 font-semibold"
                         : "bg-blue-50 text-blue-600 font-semibold"
                       : isDark
-                        ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                      ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
                   }`}
                   onClick={handleAllTasksClick}
                 >
@@ -179,8 +199,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                               ? "bg-neutral-700 text-sky-400 font-semibold"
                               : "bg-blue-50 text-blue-600 font-semibold"
                             : isDark
-                              ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+                            ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
                         }`}
                         onClick={() => {
                           navigate(section.path);
@@ -206,8 +226,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                           ? "bg-neutral-700 text-sky-400 font-semibold"
                           : "bg-blue-50 text-blue-600 font-semibold"
                         : isDark
-                          ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+                        ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
                     }`}
                     onClick={() => {
                       navigate(item.path);
@@ -230,8 +250,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                       ? "bg-neutral-700 text-sky-400"
                       : "bg-blue-50 text-blue-600"
                     : isDark
-                      ? 'text-neutral-300 hover:bg-neutral-700 hover:text-sky-400'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                    ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
                 }`}
                 onClick={handleAllTasksClick}
                 title="All Tasks"
@@ -247,8 +267,8 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                         ? "bg-neutral-700 text-sky-400"
                         : "bg-blue-50 text-blue-600"
                       : isDark
-                        ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+                      ? "text-neutral-300 hover:bg-neutral-700 hover:text-sky-400"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-blue-600"
                   }`}
                   onClick={() => {
                     navigate(item.path);
@@ -264,38 +284,46 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
         </div>
 
         {/* Sidebar Footer */}
-        <div className={`${isCollapsed && !isMobileOpen ? 'p-2' : 'p-4'} text-sm border-t transition-colors duration-300 ${
-          isDark
-            ? 'bg-neutral-800 text-neutral-400 border-neutral-700'
-            : 'bg-white text-gray-500 border-gray-200'
-        }`}>
+        <div
+          className={`${
+            isCollapsed && !isMobileOpen ? "p-2" : "p-4"
+          } text-sm border-t transition-colors duration-300 ${
+            isDark
+              ? "bg-neutral-800 text-neutral-400 border-neutral-700"
+              : "bg-white text-gray-500 border-gray-200"
+          }`}
+        >
           {(!isCollapsed || isMobileOpen) && "Copyright PK @2025"}
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        isCollapsed && !isMobileOpen ? 'md:ml-16' : 'md:ml-64'
-      } ml-0`}>
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          isCollapsed && !isMobileOpen ? "md:ml-16" : "md:ml-64"
+        } ml-0`}
+      >
         {/* Mobile Header */}
-        <div className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
-          isDark
-            ? 'bg-neutral-800 border-neutral-700'
-            : 'bg-white border-gray-200'
-        }`}>
+        <div
+          className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
+            isDark
+              ? "bg-neutral-800 border-neutral-700"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <div
             onClick={() => setOpen(!isMobileOpen)}
             className={`flex items-center gap-2 rounded-md p-2 shadow-sm transition-colors cursor-pointer ${
               isDark
-                ? 'text-sky-400 bg-neutral-700 hover:bg-neutral-600'
-                : 'text-blue-600 bg-gray-100 hover:bg-gray-200'
+                ? "text-sky-400 bg-neutral-700 hover:bg-neutral-600"
+                : "text-blue-600 bg-gray-100 hover:bg-gray-200"
             }`}
           >
             <FaBars className="text-xl" />
           </div>
           <span
             className={`text-xl font-bold cursor-pointer ${
-              isDark ? 'text-sky-400' : 'text-blue-600'
+              isDark ? "text-sky-400" : "text-blue-600"
             }`}
             onClick={() => {
               navigate("/");
@@ -310,9 +338,11 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
         </div>
 
         {/* Main Content */}
-        <main className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
-          isDark ? 'bg-neutral-900' : 'bg-gray-50'
-        }`}>
+        <main
+          className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
+            isDark ? "bg-neutral-900" : "bg-gray-50"
+          }`}
+        >
           {children}
         </main>
       </div>

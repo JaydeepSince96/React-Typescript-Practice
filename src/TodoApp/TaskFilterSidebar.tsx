@@ -86,7 +86,7 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
         <Button
           variant="outline"
           className={cn(
-            "border transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[48px] md:min-h-auto m-1 px-4 py-3 md:py-2 rounded-full font-semibold",
+            "border transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[40px] sm:min-h-[48px] md:min-h-auto m-0.5 sm:m-1 px-2 sm:px-4 py-2.5 sm:py-3 md:py-2 rounded-full font-semibold text-xs sm:text-sm md:text-base",
             isDark 
               ? "bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white" 
               : "bg-white border-gray-200 hover:bg-gray-50 text-gray-800"
@@ -96,8 +96,8 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             setSidebarOpen(false);
           }}
         >
-          <IoFilter className="mr-2 size-4" />
-          Filter Tasks
+          <IoFilter className="mr-1 sm:mr-2 size-3 sm:size-4" />
+          <span className="truncate">Filter Tasks</span>
         </Button>
       </SheetTrigger>
       <SheetContent className={cn(

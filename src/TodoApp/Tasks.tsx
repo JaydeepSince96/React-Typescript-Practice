@@ -200,7 +200,7 @@ function Tasks() {
   // Memoized priority button classes
   const getPriorityButtonClasses = useCallback((priorityValue: string) => {
     const baseClasses =
-      "m-1 md:m-1 px-4 py-3 md:py-2 rounded-full font-semibold transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[48px] md:min-h-auto";
+      "m-0.5 sm:m-1 md:m-1 px-2 sm:px-4 py-2.5 sm:py-3 md:py-2 rounded-full font-semibold transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[40px] sm:min-h-[48px] md:min-h-auto text-xs sm:text-sm md:text-base";
     
     if (isDark) {
       const colorMap: { [key: string]: string } = {
@@ -319,8 +319,8 @@ function Tasks() {
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
         <header className="mb-6">
-          {/* Mobile Layout: 2x2 Grid */}
-          <div className="grid grid-cols-2 gap-3 md:hidden">
+          {/* Mobile Layout: 2x2 Grid with improved spacing for small screens */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:hidden">
             {/* Row 1: High Priority, Medium Priority */}
             <button
               className={getPriorityButtonClasses("High Priority")}

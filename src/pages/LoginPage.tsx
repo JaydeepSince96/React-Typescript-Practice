@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   IoMailOutline, 
   IoLockClosedOutline,
@@ -16,7 +17,9 @@ import {
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark } = useTheme();
+  const { login, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -31,12 +34,32 @@ const LoginPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login data:', formData);
-    // For now, redirect to dashboard
-    navigate('/dashboard');
+    console.log('Login form submitted with data:', formData);
+    
+    if (!formData.email || !formData.password) {
+      console.error('Email or password is empty');
+      return;
+    }
+    
+    try {
+      console.log('Calling login function...');
+      await login(formData);
+      console.log('Login successful, redirecting...');
+      
+      // Redirect to intended page or dashboard
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } catch (error) {
+      // Error is handled by the auth context with toast
+      console.error('Login failed:', error);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    // Redirect to Google OAuth URL
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/google`;
   };
 
   return (
@@ -194,13 +217,14 @@ const LoginPage: React.FC = () => {
               {/* Submit Button */}
               <Button
                 type="submit"
+                disabled={loading}
                 className={`w-full h-12 text-lg font-semibold rounded-xl transition-all duration-300 ${
                   isDark 
                     ? 'bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 shadow-lg shadow-sky-500/25' 
                     : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/25'
-                } text-white transform hover:scale-105`}
+                } text-white transform hover:scale-105 disabled:opacity-50 disabled:transform-none`}
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
 
               {/* Divider */}
@@ -224,6 +248,7 @@ const LoginPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
+                  onClick={handleGoogleLogin}
                   className={`h-12 rounded-xl ${
                     isDark 
                       ? 'border-neutral-600 text-neutral-300 hover:bg-neutral-700' 

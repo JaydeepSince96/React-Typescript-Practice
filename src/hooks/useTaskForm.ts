@@ -15,10 +15,22 @@ const parseBackendDate = (dateString: string | undefined): Date | null => {
   if (!dateString) return null;
   
   try {
-    // Try parsing as backend format first (DD-MM-YY, HH:MM)
+    // Check if it's in DD/MM/YYYY format (our standard format)
+    const ddmmyyyyRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = dateString.match(ddmmyyyyRegex);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      // Create date using year, month-1 (0-indexed), day
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return isNaN(date.getTime()) ? null : date;
+    }
+    
+    // Try parsing as backend format with time (DD-MM-YY, HH:MM)
     if (dateString.includes('-') && dateString.includes(',')) {
       return parseDateFromAPI(dateString);
     }
+    
     // Fallback to regular Date parsing
     const parsed = new Date(dateString);
     return isNaN(parsed.getTime()) ? null : parsed;

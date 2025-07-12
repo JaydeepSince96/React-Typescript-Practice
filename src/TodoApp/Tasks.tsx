@@ -556,13 +556,14 @@ const TasksWithLoadingAndError = withLoadingAndError<TasksProps>(Tasks, {
 });
 
 export default function TasksContainer() {
-  const { data: allTasks = [], isLoading, error } = useGetAllTasks();
+  const { isLoading, error } = useGetAllTasks();
   
+  // Don't pass isEmpty to HOC - let the main component handle empty states
   return (
     <TasksWithLoadingAndError
       isLoading={isLoading}
       error={error}
-      isEmpty={allTasks.length === 0}
+      isEmpty={false}
     />
   );
 }

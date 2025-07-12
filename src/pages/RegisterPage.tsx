@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   IoPersonOutline, 
   IoMailOutline, 
@@ -17,6 +18,7 @@ import {
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
+  const { register, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,12 +37,28 @@ const RegisterPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Registration data:', formData);
-    // For now, redirect to login or dashboard
-    navigate('/login');
+    
+    // Validate password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      await register({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // Redirect to dashboard after successful registration
+      navigate('/dashboard');
+    } catch (error) {
+      // Error is handled by the auth context with toast
+      console.error('Registration failed:', error);
+    }
   };
 
   const benefits = [
@@ -288,13 +306,14 @@ const RegisterPage: React.FC = () => {
                   {/* Submit Button */}
                   <Button
                     type="submit"
+                    disabled={loading}
                     className={`w-full h-12 text-lg font-semibold rounded-xl transition-all duration-300 ${
                       isDark 
                         ? 'bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 shadow-lg shadow-sky-500/25' 
                         : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/25'
-                    } text-white transform hover:scale-105`}
+                    } text-white transform hover:scale-105 disabled:opacity-50 disabled:transform-none`}
                   >
-                    Create Your Account
+                    {loading ? 'Creating Account...' : 'Create Your Account'}
                   </Button>
 
                   {/* Sign In Link */}

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import RouteWrapper from "@/components/RouteWrapper";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFoundPage from "@/pages/NotFoundPage";
 import ErrorAndLoadingTest from "@/pages/ErrorAndLoadingTest";
 
@@ -15,6 +16,8 @@ const TaskReport = lazy(() => import("@/TodoApp/reports/TaskReport"));
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
 export const router = createBrowserRouter([
   {
@@ -44,33 +47,51 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: (
-      <RouteWrapper fallbackMessage="Loading dashboard...">
-        <Tasks />
-      </RouteWrapper>
+      <ProtectedRoute>
+        <RouteWrapper fallbackMessage="Loading dashboard...">
+          <DashboardPage />
+        </RouteWrapper>
+      </ProtectedRoute>
     ),
   },
   {
     path: "/tasks",
     element: (
-      <RouteWrapper fallbackMessage="Loading tasks...">
-        <Tasks />
-      </RouteWrapper>
+      <ProtectedRoute>
+        <RouteWrapper fallbackMessage="Loading tasks...">
+          <Tasks />
+        </RouteWrapper>
+      </ProtectedRoute>
     ),
   },
   {
     path: "/priority",
     element: (
-      <RouteWrapper fallbackMessage="Loading priority tasks...">
-        <Priority />
-      </RouteWrapper>
+      <ProtectedRoute>
+        <RouteWrapper fallbackMessage="Loading priority tasks...">
+          <Priority />
+        </RouteWrapper>
+      </ProtectedRoute>
     ),
   },
   {
     path: "/reports",
     element: (
-      <RouteWrapper fallbackMessage="Loading reports...">
-        <ProductivityReports />
-      </RouteWrapper>
+      <ProtectedRoute>
+        <RouteWrapper fallbackMessage="Loading reports...">
+          <ProductivityReports />
+        </RouteWrapper>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/settings",
+    element: (
+      <ProtectedRoute>
+        <RouteWrapper fallbackMessage="Loading settings...">
+          <SettingsPage />
+        </RouteWrapper>
+      </ProtectedRoute>
     ),
   },
   {

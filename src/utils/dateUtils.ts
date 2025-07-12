@@ -1,20 +1,40 @@
 // Date utility functions for API integration
 
 /**
- * Format date to dd/mm/yyyy format expected by backend
- * @param date - Date object or date string
- * @returns formatted date string (dd/mm/yyyy)
+ * Format date to DD/MM/YYYY format for API and display
+ * @param date - Date object or date string (can be DD/MM/YYYY or ISO format)
+ * @returns formatted date string (DD/MM/YYYY)
  */
 export const formatDateForAPI = (date: Date | string): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  // If it's already a string, check if it's in DD/MM/YYYY format
+  if (typeof date === 'string') {
+    // Check if it's already in DD/MM/YYYY format
+    const ddmmyyyyRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (ddmmyyyyRegex.test(date)) {
+      return date; // Already in correct format
+    }
+    
+    // Try to parse as ISO date or other formats
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      throw new Error('Invalid date provided');
+    }
+    
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear().toString();
+    
+    return `${day}/${month}/${year}`;
+  }
   
-  if (isNaN(dateObj.getTime())) {
+  // Handle Date object
+  if (isNaN(date.getTime())) {
     throw new Error('Invalid date provided');
   }
   
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-  const year = dateObj.getFullYear().toString();
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString();
   
   return `${day}/${month}/${year}`;
 };
@@ -53,52 +73,95 @@ export const parseDateFromAPI = (dateString: string): Date => {
 
 /**
  * Format date for display in UI (DD/MM/YYYY format)
- * @param date - Date object or date string
+ * @param date - Date object or date string (can be DD/MM/YYYY or ISO format)
  * @returns formatted date string for display in DD/MM/YYYY format
  */
 export const formatDateForDisplay = (date: Date | string): string => {
-  let dateObj: Date;
-  
+  // If it's already a string, check if it's in DD/MM/YYYY format
   if (typeof date === 'string') {
-    // Check if it's in backend format (DD-MM-YY, HH:MM)
-    if (date.includes('-') && date.includes(',')) {
-      try {
-        dateObj = parseDateFromAPI(date);
-      } catch {
-        dateObj = new Date(date);
-      }
-    } else {
-      dateObj = new Date(date);
+    // Check if it's already in DD/MM/YYYY format
+    const ddmmyyyyRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (ddmmyyyyRegex.test(date)) {
+      return date; // Already in correct format
     }
-  } else {
-    dateObj = date;
+    
+    // Try to parse as ISO date or other formats
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date'; // Return fallback instead of throwing error
+    }
+    
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear().toString();
+    
+    return `${day}/${month}/${year}`;
   }
   
-  if (isNaN(dateObj.getTime())) {
-    return 'Invalid Date';
+  // Handle Date object
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date'; // Return fallback instead of throwing error
   }
   
-  // Ensure DD/MM/YYYY format
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-  const year = dateObj.getFullYear().toString();
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString();
   
   return `${day}/${month}/${year}`;
 };
 
 /**
  * Format date and time for display in UI
- * @param date - Date object or date string
+ * @param date - Date object or date string (can be DD/MM/YYYY or ISO format)
  * @returns formatted date and time string for display
  */
 export const formatDateTimeForDisplay = (date: Date | string): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  // If it's a string, try to parse it appropriately
+  if (typeof date === 'string') {
+    // Check if it's in DD/MM/YYYY format and convert to ISO for Date parsing
+    const ddmmyyyyRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = date.match(ddmmyyyyRegex);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      // Convert to ISO format for proper Date parsing
+      const isoDate = `${year}-${month}-${day}`;
+      const dateObj = new Date(isoDate);
+      
+      if (isNaN(dateObj.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      return dateObj.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+    
+    // Try to parse as other date format
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return dateObj.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
   
-  if (isNaN(dateObj.getTime())) {
+  // Handle Date object
+  if (isNaN(date.getTime())) {
     return 'Invalid Date';
   }
   
-  return dateObj.toLocaleString('en-GB', {
+  return date.toLocaleString('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

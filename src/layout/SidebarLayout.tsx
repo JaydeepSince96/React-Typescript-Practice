@@ -72,6 +72,24 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
     }
   }, [isAllTasksExpanded]);
 
+  // Toggle body class when mobile sidebar opens/closes
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (isMobileOpen) {
+        document.body.classList.add("sidebar-open");
+      } else {
+        document.body.classList.remove("sidebar-open");
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.classList.remove("sidebar-open");
+      }
+    };
+  }, [isMobileOpen]);
+
   const handleAllTasksClick = () => {
     const isHomePage = location.pathname === "/";
     if (isHomePage) {
@@ -85,23 +103,23 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div
-      className={`flex min-h-screen text-white overflow-hidden relative transition-colors duration-300 ${
+      className={`flex min-h-screen text-white relative transition-colors duration-300 ${
         isDark ? "bg-neutral-900" : "bg-gray-50"
-      }`}
+      } ${isMobileOpen ? "overflow-hidden" : ""}`}
     >
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Lighter overlay that doesn't create black screen */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/20 z-[100] md:hidden transition-opacity duration-300 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         ></div>
       )}
 
-      {/* Sidebar - Hidden on mobile unless open */}
+      {/* Sidebar - Hidden on mobile unless open, lower z-index than Sheet */}
       <div
         className={`
         ${isMobileOpen ? "fixed" : "hidden"} md:block
-        ${isMobileOpen ? "inset-y-0 left-0 z-50" : ""}
+        ${isMobileOpen ? "inset-y-0 left-0 z-[200]" : ""}
         ${
           isDark
             ? "bg-neutral-800 border-neutral-700"
@@ -299,13 +317,15 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
           isCollapsed && !isMobileOpen ? "md:ml-16" : "md:ml-64"
-        } ml-0`}
+        } ${isMobileOpen ? "ml-0" : "ml-0"} ${
+          isDark ? "bg-neutral-900" : "bg-gray-50"
+        }`}
       >
         {/* Mobile Header */}
         <div
-          className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 ${
+          className={`p-4 md:hidden flex items-center justify-between border-b transition-colors duration-300 relative z-20 ${
             isDark
               ? "bg-neutral-800 border-neutral-700"
               : "bg-white border-gray-200"
@@ -339,9 +359,15 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
 
         {/* Main Content */}
         <main
-          className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${
+          className={`flex-1 h-full overflow-y-auto p-4 md:p-6 transition-all duration-300 relative z-10 ${
             isDark ? "bg-neutral-900" : "bg-gray-50"
-          }`}
+          } ${isMobileOpen ? (isDark ? "bg-neutral-900" : "bg-gray-50") : ""}`}
+          onClick={() => {
+            // Close sidebar when clicking on main content on mobile
+            if (isMobileOpen) {
+              setOpen(false);
+            }
+          }}
         >
           {children}
         </main>

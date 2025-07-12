@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { IoFilter, IoRefresh, IoCheckmarkCircle } from "react-icons/io5";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 // Define the shape of the filters
@@ -45,12 +46,15 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
 }) => {
   const [localFilters, setLocalFilters] = useState<TaskFilters>(initialFilters);
   const { isDark } = useTheme();
+  const { setOpen: setSidebarOpen } = useSidebar();
 
   useEffect(() => {
     if (isFilterOpen) {
       setLocalFilters(initialFilters);
+      // Close the navigation sidebar when filter opens on mobile
+      setSidebarOpen(false);
     }
-  }, [initialFilters, isFilterOpen]);
+  }, [initialFilters, isFilterOpen, setSidebarOpen]);
 
   const handleApply = () => {
     onApplyFilters(localFilters);
@@ -71,7 +75,13 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
   };
 
   return (
-    <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+    <Sheet open={isFilterOpen} onOpenChange={(open) => {
+      setIsFilterOpen(open);
+      if (open) {
+        // Ensure navigation sidebar is closed when filter opens
+        setSidebarOpen(false);
+      }
+    }}>
       <SheetTrigger asChild>
         <Button
           variant="outline"
@@ -81,26 +91,33 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
               ? "bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white" 
               : "bg-white border-gray-200 hover:bg-gray-50 text-gray-800"
           )}
+          onClick={() => {
+            // Close navigation sidebar when opening filter
+            setSidebarOpen(false);
+          }}
         >
           <IoFilter className="mr-2 size-4" />
           Filter Tasks
         </Button>
       </SheetTrigger>
       <SheetContent className={cn(
+        // Mobile-first responsive design
         "w-full sm:max-w-md overflow-y-auto",
+        // Background and border styling
         isDark 
           ? "bg-neutral-800 border-l border-neutral-700 text-white" 
           : "bg-white border-l border-gray-200 text-gray-900"
-      )}>
-        <SheetHeader className="p-6">
+      )} side="right">
+        <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle className={cn(
-            "text-2xl",
+            "text-xl sm:text-2xl font-semibold",
             isDark ? "text-sky-400" : "text-blue-600"
           )}>
             Filter Tasks
           </SheetTitle>
         </SheetHeader>
-        <div className="p-6 space-y-6">
+        {/* Main content with improved mobile scrolling */}
+        <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto">
           <div>
             <Label htmlFor="searchId" className={cn(
               isDark ? "text-neutral-300" : "text-gray-700"
@@ -260,8 +277,10 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
             </div>
           </div>
         </div>
+        
+        {/* Sticky footer with better mobile spacing */}
         <SheetFooter className={cn(
-          "flex flex-col gap-3 p-6 pt-4 border-t",
+          "flex flex-col gap-3 p-6 pt-4 border-t mt-auto",
           isDark ? "border-neutral-700" : "border-gray-200"
         )}>
           <Button

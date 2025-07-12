@@ -315,7 +315,7 @@ function Tasks() {
 
   return (
     <SidebarLayout>
-      <div className={`min-h-screen flex flex-col transition-colors duration-300 ${
+      <div className={`min-h-full flex flex-col transition-colors duration-300 relative z-10 ${
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
         <header className="flex justify-between items-center mb-6 flex-wrap gap-4">

@@ -18,6 +18,29 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+/* Fix for Sheet/Dialog z-index stacking and mobile overlay conflicts */
+[data-slot="sheet-portal"] {
+  position: relative;
+  z-index: 9999;
+}
+
+[data-slot="sheet-overlay"] {
+  z-index: 9999 !important;
+}
+
+[data-slot="sheet-content"] {
+  z-index: 10000 !important;
+}
+
+/* Ensure Sheet components always appear above navigation overlays */
+.radix-dialog-overlay {
+  z-index: 9999 !important;
+}
+
+.radix-dialog-content {
+  z-index: 10000 !important;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -31,6 +54,19 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  position: relative;
+}
+
+/* Prevent body scrolling when mobile sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* Ensure main content is always visible */
+main {
+  background-color: inherit !important;
+  position: relative;
+  z-index: 1;
 }
 
 @custom-variant dark (&:is(.dark *));

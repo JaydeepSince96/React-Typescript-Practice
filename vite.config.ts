@@ -11,4 +11,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: '0.0.0.0', // Allow connections from any IP address in your network
+    port: 5173,       // Use a fixed port
+    open: false,      // Don't automatically open browser
+    cors: true,       // Enable CORS for API calls
+  },
 })

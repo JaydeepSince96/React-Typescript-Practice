@@ -156,6 +156,20 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
                   <ThemeToggle />
                 </div>
               )}
+              {/* Mobile close button - only show on mobile when sidebar is open */}
+              {isMobileOpen && (
+                <button
+                  onClick={() => setOpen(false)}
+                  className={`md:hidden p-2 rounded-lg transition-colors duration-200 ${
+                    isDark
+                      ? "hover:bg-neutral-700 text-sky-400"
+                      : "hover:bg-gray-100 text-blue-600"
+                  }`}
+                  title="Close sidebar"
+                >
+                  <MdClose className="size-5" />
+                </button>
+              )}
               {/* Desktop toggle button - hidden on mobile */}
               <button
                 onClick={toggleSidebar}

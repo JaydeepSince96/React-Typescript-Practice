@@ -81,11 +81,11 @@ export const useSubtask = (subtaskId: string) => {
 };
 
 // Get subtask statistics
-export const useSubtaskStats = (taskId: string) => {
+export const useSubtaskStats = (taskId: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: subtaskKeys.stats(taskId),
     queryFn: () => getSubtaskStats(taskId),
-    enabled: !!taskId,
+    enabled: !!taskId && (options?.enabled !== false),
     staleTime: 60000, // 1 minute
   });
 };

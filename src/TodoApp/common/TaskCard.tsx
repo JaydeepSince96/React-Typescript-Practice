@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState, useEffect } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -12,8 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTheme } from "@/contexts/ThemeContext";
-import { getSubtaskStats } from "@/api/subtask/subtask-api";
-import type { ISubtaskStats } from "@/api/types";
+import { useSubtaskStats } from "@/hooks/useSubtaskHooks";
 
 
 // Utility function to truncate text - memoized
@@ -45,29 +44,21 @@ const TaskCard = memo<TaskCardProps>(
     const { isDark } = useTheme();
     const [showCopyTooltip, setShowCopyTooltip] = useState(false);
     const [copied, setCopied] = useState(false);
-    const [subtaskStats, setSubtaskStats] = useState<ISubtaskStats | null>(null);
     const [showSubtaskTooltip, setShowSubtaskTooltip] = useState(false);
+    const [shouldFetchSubtasks, setShouldFetchSubtasks] = useState(false);
 
-    // Fetch subtask stats when component mounts or task changes
-    useEffect(() => {
-      const fetchSubtaskStats = async () => {
-        try {
-          const stats = await getSubtaskStats(task._id);
-          setSubtaskStats(stats);
-        } catch (error) {
-          console.error('Failed to fetch subtask stats:', error);
-          // Set default empty stats if API fails
-          setSubtaskStats({
-            total: 0,
-            completed: 0,
-            pending: 0,
-            completionRate: 0,
-          });
-        }
-      };
+    // Only fetch subtask stats when user hovers for tooltip (lazy loading)
+    const { data: subtaskStats } = useSubtaskStats(task._id, {
+      enabled: shouldFetchSubtasks
+    });
 
-      fetchSubtaskStats();
-    }, [task._id]);
+    // Handler to enable subtask fetching when user hovers over subtask area
+    const handleSubtaskHover = () => {
+      if (!shouldFetchSubtasks) {
+        setShouldFetchSubtasks(true);
+      }
+      setShowSubtaskTooltip(true);
+    };
 
     // Memoized priority border color
     const priorityBorderColor = useMemo(() => {
@@ -371,7 +362,7 @@ const TaskCard = memo<TaskCardProps>(
                     : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 hover:text-purple-800 shadow-sm hover:shadow-md'
                 }`}
                 onClick={handleTaskTextClick}
-                onMouseEnter={() => setShowSubtaskTooltip(true)}
+                onMouseEnter={handleSubtaskHover}
                 onMouseLeave={() => setShowSubtaskTooltip(false)}
               >
                 <div className="flex items-center gap-1">

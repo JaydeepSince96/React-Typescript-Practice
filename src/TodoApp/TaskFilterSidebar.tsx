@@ -86,7 +86,7 @@ const TaskFilterSidebar: React.FC<TaskFilterSidebarProps> = ({
         <Button
           variant="outline"
           className={cn(
-            "border transition-colors duration-200",
+            "border transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[48px] md:min-h-auto m-1 px-4 py-3 md:py-2 rounded-full font-semibold",
             isDark 
               ? "bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white" 
               : "bg-white border-gray-200 hover:bg-gray-50 text-gray-800"

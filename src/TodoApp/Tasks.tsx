@@ -200,7 +200,7 @@ function Tasks() {
   // Memoized priority button classes
   const getPriorityButtonClasses = useCallback((priorityValue: string) => {
     const baseClasses =
-      "m-1 px-4 py-2 rounded-full font-semibold transition-colors duration-200";
+      "m-1 md:m-1 px-4 py-3 md:py-2 rounded-full font-semibold transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center min-h-[48px] md:min-h-auto";
     
     if (isDark) {
       const colorMap: { [key: string]: string } = {
@@ -318,24 +318,60 @@ function Tasks() {
       <div className={`min-h-full flex flex-col transition-colors duration-300 relative z-10 ${
         isDark ? 'bg-neutral-900' : 'bg-gray-50'
       }`}>
-        <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <div className="flex flex-wrap">
-            {priorityLabels.map((item) => (
-              <button
-                className={getPriorityButtonClasses(item.label)}
-                key={item.value}
-                onClick={() => handlePriorityNavigation(item.label)}
-              >
-                {item.label}
-              </button>
-            ))}
+        <header className="mb-6">
+          {/* Mobile Layout: 2x2 Grid */}
+          <div className="grid grid-cols-2 gap-3 md:hidden">
+            {/* Row 1: High Priority, Medium Priority */}
+            <button
+              className={getPriorityButtonClasses("High Priority")}
+              onClick={() => handlePriorityNavigation("High Priority")}
+            >
+              High Priority
+            </button>
+            <button
+              className={getPriorityButtonClasses("Medium Priority")}
+              onClick={() => handlePriorityNavigation("Medium Priority")}
+            >
+              Medium Priority
+            </button>
+            
+            {/* Row 2: Filter Tasks, Low Priority */}
+            <div className="w-full">
+              <TaskFilterSidebar
+                initialFilters={filters}
+                onApplyFilters={handleApplyFilters}
+                isFilterOpen={isFilterOpen}
+                setIsFilterOpen={setIsFilterOpen}
+              />
+            </div>
+            <button
+              className={getPriorityButtonClasses("Low Priority")}
+              onClick={() => handlePriorityNavigation("Low Priority")}
+            >
+              Low Priority
+            </button>
           </div>
-          <TaskFilterSidebar
-            initialFilters={filters}
-            onApplyFilters={handleApplyFilters}
-            isFilterOpen={isFilterOpen}
-            setIsFilterOpen={setIsFilterOpen}
-          />
+
+          {/* Desktop Layout: Horizontal with Filter on Right */}
+          <div className="hidden md:flex justify-between items-center flex-wrap gap-4">
+            <div className="flex flex-wrap">
+              {priorityLabels.map((item) => (
+                <button
+                  className={getPriorityButtonClasses(item.label)}
+                  key={item.value}
+                  onClick={() => handlePriorityNavigation(item.label)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <TaskFilterSidebar
+              initialFilters={filters}
+              onApplyFilters={handleApplyFilters}
+              isFilterOpen={isFilterOpen}
+              setIsFilterOpen={setIsFilterOpen}
+            />
+          </div>
         </header>
 
         {/* Filter status indicator */}

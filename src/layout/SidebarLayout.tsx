@@ -96,7 +96,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
       setIsAllTasksExpanded(!isAllTasksExpanded);
     } else {
       setIsAllTasksExpanded(true);
-      navigate("/");
+      navigate("/dashboard");
     }
     // Removed automatic sidebar closing - let users close it manually
   };
@@ -143,7 +143,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               <div
                 className="cursor-pointer md:text-left"
                 onClick={() => {
-                  navigate("/");
+                  navigate("/dashboard");
                   // Removed automatic sidebar closing - let users close it manually
                 }}
               >
@@ -360,7 +360,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
               isDark ? "text-sky-400" : "text-blue-600"
             }`}
             onClick={() => {
-              navigate("/");
+              navigate("/dashboard");
               // Removed automatic sidebar closing - let users close it manually
             }}
           >

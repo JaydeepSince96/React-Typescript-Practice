@@ -10,9 +10,47 @@ const Priority = lazy(() => import("@/TodoApp/priority-wise/Priority"));
 const ProductivityReports = lazy(() => import("@/TodoApp/reports/ProductivityReports"));
 const TaskDetails = lazy(() => import("@/TodoApp/TaskDetails"));
 const TaskReport = lazy(() => import("@/TodoApp/reports/TaskReport"));
+
+// Landing and Auth pages
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
+const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
+
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: (
+      <RouteWrapper fallbackMessage="Loading...">
+        <LandingPage />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <RouteWrapper fallbackMessage="Loading registration...">
+        <RegisterPage />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/login",
+    element: (
+      <RouteWrapper fallbackMessage="Loading login...">
+        <LoginPage />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <RouteWrapper fallbackMessage="Loading dashboard...">
+        <Tasks />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/tasks",
     element: (
       <RouteWrapper fallbackMessage="Loading tasks...">
         <Tasks />
@@ -28,6 +66,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/reports",
+    element: (
+      <RouteWrapper fallbackMessage="Loading reports...">
+        <ProductivityReports />
+      </RouteWrapper>
+    ),
+  },
+  {
     path: "/chart",
     element: (
       <RouteWrapper fallbackMessage="Loading charts...">
@@ -36,7 +82,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/tasks",
+    path: "/task-reports",
     element: (
       <RouteWrapper fallbackMessage="Loading task reports...">
         <TaskReport />

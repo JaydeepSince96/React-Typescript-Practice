@@ -9,7 +9,7 @@ const NotFoundPage = memo(() => {
   const { isDark } = useTheme();
 
   const handleGoHome = useCallback(() => {
-    navigate('/');
+    navigate('/dashboard');
   }, [navigate]);
 
   const handleGoBack = useCallback(() => {
@@ -135,7 +135,7 @@ const NotFoundPage = memo(() => {
             }`}>Quick Navigation</h3>
             <div className="flex flex-wrap justify-center gap-3">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className={`text-sm underline transition-colors duration-300 ${
                   isDark ? 'text-sky-400 hover:text-sky-300' : 'text-blue-500 hover:text-blue-400'
                 }`}

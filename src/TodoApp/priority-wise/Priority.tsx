@@ -98,7 +98,7 @@ const Priority = memo(() => {
   }, []);
 
   const handleBackNavigation = useCallback(() => {
-    navigate("/");
+    navigate("/dashboard");
   }, [navigate]);
 
   // Show loading state

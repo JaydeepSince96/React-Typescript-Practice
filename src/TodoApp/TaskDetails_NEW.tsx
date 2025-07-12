@@ -94,7 +94,7 @@ const TaskDetails: React.FC = () => {
       await deleteTaskMutation.mutateAsync(itemToDelete.id);
       setTaskDeleteDialogOpen(false);
       setItemToDelete(null);
-      navigate('/'); // Navigate back to task list after deletion
+      navigate('/dashboard'); // Navigate back to task list after deletion
     } catch (error) {
       console.error('Error deleting task:', error);
     }
@@ -154,7 +154,7 @@ const TaskDetails: React.FC = () => {
       <SidebarLayout>
         <div className="p-6 text-center text-white">
           <p className="text-red-400 mb-4">Failed to load task</p>
-          <Button onClick={() => navigate("/")} variant="outline">
+          <Button onClick={() => navigate("/dashboard")} variant="outline">
             Go Back
           </Button>
         </div>
